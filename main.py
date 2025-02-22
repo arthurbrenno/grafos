@@ -6,7 +6,7 @@ class Grafo:
     grafo: dict[str, set[str]] = field(default_factory=dict)
 
     def criar_vertice(self, vertice: str) -> None:
-        self.grafo[vertice] = set(())
+        self.grafo[vertice] = set({})
 
     def adicionar_aresta(self, origem: str, destino: str) -> None:
         self.grafo[origem].add(destino)
