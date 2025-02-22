@@ -3,15 +3,14 @@ from typing import Sequence
 
 @dataclass
 class Grafo:
-    grafo: dict[str, list[str]] = field(default_factory=dict)
+    grafo: dict[str, set[str]] = field(default_factory=dict)
 
     def criar_vertice(self, vertice: str) -> None:
-        if vertice not in self.grafo:
-            self.grafo[vertice] = []
+        self.grafo[vertice] = set(())
 
     def adicionar_aresta(self, origem: str, destino: str) -> None:
-        self.grafo[origem].append(destino)
-        self.grafo[destino].append(origem)
+        self.grafo[origem].add(destino)
+        self.grafo[destino].add(origem)
 
     def listar_vizinhos(self, vertice: str) -> Sequence[str]:
         return self.grafo.get(vertice)
