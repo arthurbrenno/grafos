@@ -80,7 +80,7 @@ class Grafo:
             self.vertices.criar(v1)
             self.vertices.criar(v2)
             self.arcos.criar(v1, v2, arco=arco)
-            self.arcos.criar(v1, v2, arco=arco)
+            self.arcos.criar(v2, v1, arco=arco)
 
     def mostrar_matriz_adjacencia(self) -> None:
         """
