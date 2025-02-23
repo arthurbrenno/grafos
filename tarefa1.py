@@ -281,6 +281,18 @@ class Grafo:
     vertices: ListaDeVertices = field(default_factory=ListaDeVertices)
     arcos: MapaDeArcos = field(default_factory=MapaDeArcos)
 
+    def calcular_todas_distancia(self, v1: Vertice, v2: Vertice) -> tuple[int, ...]:
+        """Calcula a distancia entre dois vertices. Retorna todas as somas possiveis
+
+        Args:
+            v1 (Vertice): Ponto de partida
+            v2 (Vertice): Ponto de chegada
+
+        Returns:
+            tuple[int, ...]: Uma tupla contendo todas as somas de distancias possiveis
+            de ambos os vertices sendo analisados.
+        """
+
     def g(self, *_to: tuple[Vertice, Vertice, Arco]) -> None:
         """
         Adiciona vértices e arcos ao grafo a partir de uma lista de tuplas.
