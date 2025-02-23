@@ -306,6 +306,7 @@ def g(grafo: Grafo, *_to: tuple[Vertice, Vertice, Arco]) -> None:
         grafo.vertices.criar(v1)
         grafo.vertices.criar(v2)
         grafo.arcos.criar(v1, v2, arco)
+        grafo.arcos.criar(v2, v1, arco)
 
 
 @dataclass(frozen=True)
@@ -406,7 +407,7 @@ class CalculadoraDeGrafos:
     grafo: Grafo
 
     def calcular_soma_pesos(self, v1: Vertice, v2: Vertice) -> tuple[int, ...]:
-        """Calcula a soma de todos os pesos possiveis entre dois vertices
+        """Calcula a soma de todos os pesos possiveis entre dois vertices do grafo
 
         Args:
             v1 (Vertice): Ponto de partida
@@ -417,7 +418,7 @@ class CalculadoraDeGrafos:
         """
 
     def calcular_soma_comprimentos(self, v1: Vertice, v2: Vertice) -> tuple[int, ...]:
-        """Calcula todos os comprimentos possiveis entre dois vertices
+        """Calcula todos os comprimentos possiveis entre dois vertices do grafo
 
         Args:
             v1 (Vertice): Ponto de partida
@@ -437,6 +438,8 @@ v3 = Vertice("C")
 
 grafo.vertices.criar(v3)
 g(grafo, (v1, v2, Arco()))
-g(grafo, (v2, v1, Arco()))
 
 grafo.mostrar_matriz_adjacencia(clear_screen=True)
+
+calculadora = CalculadoraDeGrafos(grafo)
+print(calculadora.calcular_soma_comprimentos(v1, v2))
