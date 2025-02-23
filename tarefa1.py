@@ -44,6 +44,7 @@ Para mais detalhes sobre cada classe e seus métodos, consulte as docstrings ind
 
 from __future__ import annotations
 
+import os
 from collections.abc import Iterator, ValuesView
 from dataclasses import dataclass, field
 
@@ -179,6 +180,9 @@ class ListaDeVertices:
         for el in self.vertices:
             yield el
 
+    def __contains__(self, item: Vertice) -> bool:
+        return item in self.vertices
+
     def __len__(self) -> int:
         """Retorna o tamanho da lista de vertices
 
@@ -243,6 +247,9 @@ class MapaDeArcos:
         """
         return self.arcos.values()
 
+    def __get_item__(self, item: tuple[Vertice, Vertice]) -> Arco:
+        return self.arcos[item]
+
     def __set_item__(self, key: tuple[Vertice, Vertice], new_val: Arco) -> None:
         """
         Define um novo valor para um arco específico.
@@ -267,63 +274,67 @@ class MapaDeArcos:
         """
         self.arcos[key] = new_val
 
+    def __contains__(self, item: tuple[Vertice, Vertice]) -> bool:
+        return item in self.arcos
 
-@dataclass
+
+def g(grafo: Grafo, *_to: tuple[Vertice, Vertice, Arco]) -> None:
+    """
+    Adiciona vértices e arcos ao grafo a partir de uma lista de tuplas.
+
+    Cada tupla deve conter dois vértices e um arco. O método adiciona os vértices
+    à coleção de vértices e cria arcos bidirecionais entre eles.
+
+    Parâmetros:
+        *_to (tuple[Vertice, Vertice, Arco]): Tuplas contendo v1, v2 e arco.
+
+    Retorna:
+        None
+
+    Exemplo:
+        >>> grafo = Grafo()
+        >>> v1 = Vertice("A")
+        >>> v2 = Vertice("B")
+        >>> arco = Arco(peso=1.5)
+        >>> grafo.g((v1, v2, arco))
+        >>> len(grafo.vertices)
+        2
+        >>> grafo.arcos.arcos[(v1, v2)].peso
+        1.5
+    """
+    for v1, v2, arco in _to:
+        grafo.vertices.criar(v1)
+        grafo.vertices.criar(v2)
+        grafo.arcos.criar(v1, v2, arco)
+
+
+@dataclass(frozen=True)
 class Grafo:
     """
-    Representa um grafo não dirigido com vértices e arestas ponderadas.
+    Uma tripla ordenada (N, A, g) em que:
+    N: Um conjunto não vazio de nós
+    A: Um conjunto de arcos (arestas)
+    g: Uma função que associa cada arco `a` a um par ordenado x-y de nós,
+    chamados de extremidades de `a`.
 
     Atributos:
         vertices (ListaDeVertices): A coleção de vértices do grafo.
         arcos (MapaDeArcos): O mapa de arcos do grafo.
-    """
 
-    vertices: ListaDeVertices = field(default_factory=ListaDeVertices)
-    arcos: MapaDeArcos = field(default_factory=MapaDeArcos)
-
-    def calcular_todas_distancia(self, v1: Vertice, v2: Vertice) -> tuple[int, ...]:
-        """Calcula a distancia entre dois vertices. Retorna todas as somas possiveis
-
-        Args:
-            v1 (Vertice): Ponto de partida
-            v2 (Vertice): Ponto de chegada
-
-        Returns:
-            tuple[int, ...]: Uma tupla contendo todas as somas de distancias possiveis
-            de ambos os vertices sendo analisados.
-        """
-
-    def g(self, *_to: tuple[Vertice, Vertice, Arco]) -> None:
-        """
-        Adiciona vértices e arcos ao grafo a partir de uma lista de tuplas.
-
-        Cada tupla deve conter dois vértices e um arco. O método adiciona os vértices
-        à coleção de vértices e cria arcos bidirecionais entre eles.
-
-        Parâmetros:
-            *_to (tuple[Vertice, Vertice, Arco]): Tuplas contendo v1, v2 e arco.
-
-        Retorna:
-            None
-
-        Exemplo:
+    Exemplo:
             >>> grafo = Grafo()
             >>> v1 = Vertice("A")
             >>> v2 = Vertice("B")
             >>> arco = Arco(peso=1.5)
             >>> grafo.g((v1, v2, arco))
-            >>> len(grafo.vertices)
-            2
-            >>> grafo.arcos.arcos[(v1, v2)].peso
+            >>> grafo.calcular_comprimento(v1, v2)
             1.5
-        """
-        for v1, v2, arco in _to:
-            self.vertices.criar(v1)
-            self.vertices.criar(v2)
-            self.arcos.criar(v1, v2, arco)
-            self.arcos.criar(v2, v1, arco)
+    """
 
-    def mostrar_matriz_adjacencia(self) -> None:
+    vertices: ListaDeVertices = field(default_factory=ListaDeVertices)
+    arcos: MapaDeArcos = field(default_factory=MapaDeArcos)
+
+    def mostrar_matriz_adjacencia(self, clear_screen: bool = False) -> None:
         """
         Mostra a matriz de adjacência do grafo de forma legível e bem formatada.
 
@@ -350,6 +361,9 @@ class Grafo:
             B  │1.0  null
             ====+=
         """
+        if clear_screen:
+            os.system("cls" if os.name == "nt" else "clear")
+
         vertices_ordenados = sorted(list(self.vertices.vertices))
         n = len(vertices_ordenados)
 
@@ -387,6 +401,33 @@ class Grafo:
         print("=" * (largura_rotulo + 1) + "+" + "=" * ((largura_valor + 1) * n - 1))
 
 
+@dataclass(frozen=True)
+class CalculadoraDeGrafos:
+    grafo: Grafo
+
+    def calcular_soma_pesos(self, v1: Vertice, v2: Vertice) -> tuple[int, ...]:
+        """Calcula a soma de todos os pesos possiveis entre dois vertices
+
+        Args:
+            v1 (Vertice): Ponto de partida
+            v2 (Vertice): Ponto de chegada
+
+        Returns:
+            tuple[int, ...]: retorna uma tupla com todos a soma de cada peso possivel.
+        """
+
+    def calcular_soma_comprimentos(self, v1: Vertice, v2: Vertice) -> tuple[int, ...]:
+        """Calcula todos os comprimentos possiveis entre dois vertices
+
+        Args:
+            v1 (Vertice): Ponto de partida
+            v2 (Vertice): Ponto de chegada
+
+        Returns:
+            tuple[int, ...]: retorna uma tupla com todos os comprimentos possiveis.
+        """
+
+
 # Exemplo de uso
 grafo = Grafo()
 
@@ -395,6 +436,7 @@ v2 = Vertice("B")
 v3 = Vertice("C")
 
 grafo.vertices.criar(v3)
-grafo.g((v1, v2, Arco()))
+g(grafo, (v1, v2, Arco()))
+g(grafo, (v2, v1, Arco()))
 
-grafo.mostrar_matriz_adjacencia()
+grafo.mostrar_matriz_adjacencia(clear_screen=True)
