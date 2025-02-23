@@ -45,7 +45,7 @@ Para mais detalhes sobre cada classe e seus métodos, consulte as docstrings ind
 from __future__ import annotations
 
 import os
-from collections.abc import Iterator, ValuesView
+from collections.abc import Iterator, Sequence, ValuesView
 from dataclasses import dataclass, field
 
 
@@ -403,10 +403,14 @@ class Grafo:
 
 
 @dataclass(frozen=True)
-class CalculadoraDeGrafos:
+class CalculadoraDeGrafo:
     grafo: Grafo
 
-    def calcular_soma_pesos(self, v1: Vertice, v2: Vertice) -> tuple[int, ...]:
+    def calcular_possibilidades_caminhos(
+        self, v1: Vertice, v2: Vertice, /
+    ) -> Sequence[Sequence[Arco]]: ...
+
+    def calcular_soma_pesos(self, v1: Vertice, v2: Vertice, /) -> Sequence[int]:
         """Calcula a soma de todos os pesos possiveis entre dois vertices do grafo
 
         Args:
@@ -414,10 +418,17 @@ class CalculadoraDeGrafos:
             v2 (Vertice): Ponto de chegada
 
         Returns:
-            tuple[int, ...]: retorna uma tupla com todos a soma de cada peso possivel.
+            Sequence[int]: retorna uma Sequencia com todas as somas de cada peso possivel.
         """
+        possibilidades = self.calcular_possibilidades_caminhos(v1, v2)
+        pesos = []
+        for possibilidade in possibilidades:
+            soma_pesos = 0
+            for arco in possibilidade:
+                soma_pesos += arco.peso
+            pesos.append(soma_pesos)
 
-    def calcular_soma_comprimentos(self, v1: Vertice, v2: Vertice) -> tuple[int, ...]:
+    def calcular_soma_comprimentos(self, v1: Vertice, v2: Vertice, /) -> Sequence[int]:
         """Calcula todos os comprimentos possiveis entre dois vertices do grafo
 
         Args:
@@ -425,11 +436,13 @@ class CalculadoraDeGrafos:
             v2 (Vertice): Ponto de chegada
 
         Returns:
-            tuple[int, ...]: retorna uma tupla com todos os comprimentos possiveis.
+            Sequence[int]: retorna uma tupla com todos os comprimentos possiveis.
         """
+        possibilidades = self.calcular_possibilidades_caminhos(v1, v2)
+        comprimentos = [len(p) for p in possibilidades]
+        return comprimentos
 
 
-# Exemplo de uso
 grafo = Grafo()
 
 v1 = Vertice("A")
@@ -441,5 +454,5 @@ g(grafo, (v1, v2, Arco()))
 
 grafo.mostrar_matriz_adjacencia(clear_screen=True)
 
-calculadora = CalculadoraDeGrafos(grafo)
+calculadora = CalculadoraDeGrafo(grafo)
 print(calculadora.calcular_soma_comprimentos(v1, v2))
