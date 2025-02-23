@@ -146,6 +146,6 @@ v2 = Vertice("B")
 v3 = Vertice("C")
 
 grafo.vertices.criar(v3)
-grafo.g((v1, v2, Arco(peso=1)))
+grafo.g((v1, v2, Arco()))
 
 grafo.mostrar_matriz_adjacencia()
