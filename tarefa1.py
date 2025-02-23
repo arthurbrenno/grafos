@@ -408,7 +408,8 @@ class CalculadoraDeGrafo:
 
     def calcular_possibilidades_caminhos(
         self, v1: Vertice, v2: Vertice, /
-    ) -> Sequence[Sequence[Arco]]: ...
+    ) -> Sequence[Sequence[Arco]]:
+        """TODO(arthur)"""
 
     def calcular_soma_pesos(self, v1: Vertice, v2: Vertice, /) -> Sequence[int]:
         """Calcula a soma de todos os pesos possiveis entre dois vertices do grafo
