@@ -140,6 +140,17 @@ class ListaDeVertices:
 
     vertices: set[Vertice] = field(default_factory=set)
 
+    def verificar_existencia(self, _v: Vertice, /) -> bool:
+        """Verifica se um vertice existe dentro da lista.
+
+        Args:
+            _v (Vertice): O vertice para ser verificado
+
+        Returns:
+            bool: returna True caso exista, False caso contrário.
+        """
+        return _v in self.vertices
+
     def criar(self, _v: Vertice, /) -> None:
         """
         Adiciona um vértice à coleção.
@@ -449,17 +460,20 @@ class CalculadoraDeGrafo:
         return comprimentos
 
 
+# Instanciar o grafo
 grafo = Grafo()
 
+# Criar vertices.
 v1 = Vertice("A")
 v2 = Vertice("B")
 v3 = Vertice("C")
 
-
+# Adicionar vertices no grafo
 grafo.vertices.criar(v1)
 grafo.vertices.criar(v2)
 grafo.vertices.criar(v3)
 
+# Associar vertices relacionados
 g(grafo, (v1, v2))
 
 grafo.mostrar_matriz_adjacencia(clear_screen=True)
