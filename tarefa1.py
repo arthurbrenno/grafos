@@ -615,5 +615,5 @@ if __name__ == "__main__":
 
     beginning = timeit.default_timer()
     main()
-    logger.debug(f"Execução finalizada em {(timeit.default_timer() - beginning):.2f}s")
+    logger.debug(f"Execução finalizada em {(timeit.default_timer() - beginning):.3f}s")
 # endregion
