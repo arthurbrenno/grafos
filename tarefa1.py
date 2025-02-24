@@ -478,5 +478,3 @@ grafo.vertices.criar(v3)
 g(grafo, (v1, v2))
 
 grafo.mostrar_matriz_adjacencia(clear_screen=True)
-
-calculadora = CalculadoraDeGrafo(grafo)
