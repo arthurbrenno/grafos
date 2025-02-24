@@ -278,7 +278,9 @@ class MapaDeArcos:
         return item in self.arcos
 
 
-def g(grafo: Grafo, *_to: tuple[Vertice, Vertice, Arco]) -> None:
+def g(
+    grafo: Grafo, *_to: tuple[Vertice, Vertice, Arco] | tuple[Vertice, Vertice]
+) -> None:
     """
     Adiciona vértices e arcos ao grafo a partir de uma lista de tuplas.
 
@@ -286,7 +288,7 @@ def g(grafo: Grafo, *_to: tuple[Vertice, Vertice, Arco]) -> None:
     à coleção de vértices e cria arcos bidirecionais entre eles.
 
     Parâmetros:
-        *_to (tuple[Vertice, Vertice, Arco]): Tuplas contendo v1, v2 e arco.
+        *_to (tuple[Vertice, Vertice, Arco] | tuple[Vertice, Vertice]): Tuplas contendo v1, v2 e arco.
 
     Retorna:
         None
@@ -302,7 +304,12 @@ def g(grafo: Grafo, *_to: tuple[Vertice, Vertice, Arco]) -> None:
         >>> grafo.arcos.arcos[(v1, v2)].peso
         1.5
     """
-    for v1, v2, arco in _to:
+
+    for tup in _to:
+        v1 = tup[0]
+        v2 = tup[1]
+        arco = tup[2] if len(tup) == 3 else Arco()
+
         grafo.arcos.criar(v1, v2, arco)
         grafo.arcos.criar(v2, v1, arco)
 
@@ -448,10 +455,13 @@ v1 = Vertice("A")
 v2 = Vertice("B")
 v3 = Vertice("C")
 
+
+grafo.vertices.criar(v1)
+grafo.vertices.criar(v2)
 grafo.vertices.criar(v3)
-g(grafo, (v1, v2, Arco()))
+
+g(grafo, (v1, v2))
 
 grafo.mostrar_matriz_adjacencia(clear_screen=True)
 
 calculadora = CalculadoraDeGrafo(grafo)
-print(calculadora.calcular_soma_comprimentos(v1, v2))
