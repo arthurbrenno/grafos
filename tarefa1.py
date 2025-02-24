@@ -44,249 +44,28 @@ Para mais detalhes sobre cada classe e seus métodos, consulte as docstrings ind
 
 from __future__ import annotations
 
+import logging
+import logging.config
 import os
+import timeit
 from collections.abc import Iterator, MutableSequence, MutableSet, Sequence, ValuesView
-
 from dataclasses import dataclass, field
+from pprint import pformat
 
 type PesoArco = int
 
-
-@dataclass(frozen=True, order=True)
-class Vertice:
-    """
-    Representa um vértice em um grafo.
-
-    Esta classe é imutável (frozen) e pode ser ordenada com base no atributo 'nome'.
-
-    Atributos:
-        nome (str): O nome único do vértice.
-    """
-
-    nome: str
-
-    def __format__(self, format_spec: str) -> str:
-        """
-        Formata o vértice de acordo com a especificação de formato fornecida.
-
-        Especificações de formato suportadas:
-            - 'n' ou '' (vazio): Retorna apenas o nome do vértice.
-            - 'f': Retorna uma representação completa (nome e id).
-            - 'i': Retorna apenas o id do vértice (neste caso, igual ao nome).
-            - Um número (ex: '3'): Retorna o nome do vértice com padding para a largura especificada.
-
-        Parâmetros:
-            format_spec (str): A especificação de formato a ser usada.
-
-        Retorna:
-            str: A representação formatada do vértice.
-
-        Levanta:
-            ValueError: Se a especificação de formato for desconhecida.
-
-        Exemplos:
-            >>> v = Vertice("A")
-            >>> f"{v:n}"  # ou f"{v}"
-            'A'
-            >>> f"{v:f}"
-            'A (id=A)'
-            >>> f"{v:i}"
-            'A'
-            >>> f"{v:3}"
-            'A  '  # padded to width 3
-        """
-        try:
-            width = int(format_spec)
-            return f"{self.nome:{width}}"
-        except ValueError:
-            if not format_spec or format_spec == "n":
-                return self.nome
-            elif format_spec == "f":
-                return f"{self.nome} (id={self.nome})"
-            elif format_spec == "i":
-                return self.nome
-            else:
-                raise ValueError(f"Unknown format code '{format_spec}' for Vertice")
+# region logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.propagate = False
+console_handler = logging.StreamHandler()
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
+# endregion
 
 
-@dataclass(frozen=True, order=True)
-class Arco:
-    """
-    Representa uma aresta (arco) entre dois vértices em um grafo.
-
-    Esta classe é imutável (frozen).
-
-    Atributos:
-        peso (float): O peso da aresta. Valor padrão é 1.0.
-    """
-
-    origem: Vertice
-    destino: Vertice
-    peso: float = field(default=1.0)
-
-
-@dataclass(frozen=True)
-class ListaDeVertices:
-    """
-    Representa uma coleção de vértices em um grafo.
-
-    Utiliza um conjunto para armazenar os vértices, garantindo unicidade.
-
-    Atributos:
-        vertices (set[Vertice]): Conjunto de vértices.
-    """
-
-    vertices: set[Vertice] = field(default_factory=set)
-
-    def verificar_existencia(self, _v: Vertice, /) -> bool:
-        """Verifica se um vertice existe dentro da lista.
-
-        Args:
-            _v (Vertice): O vertice para ser verificado
-
-        Returns:
-            bool: returna True caso exista, False caso contrário.
-        """
-        return _v in self.vertices
-
-    def criar(self, _v: Vertice, /) -> None:
-        """
-        Adiciona um vértice à coleção.
-
-        Parâmetros:
-            _v (Vertice): O vértice a ser adicionado (parâmetro apenas posicional).
-
-        Retorna:
-            None
-
-        Exemplo:
-            >>> lista = ListaDeVertices()
-            >>> v = Vertice("A")
-            >>> lista.criar(v)
-            >>> len(lista.vertices)
-            1
-        """
-        self.vertices.add(_v)
-
-    def __iter__(self) -> Iterator[Vertice]:
-        """
-        Retorna um iterador sobre os vértices na coleção.
-
-        Retorna:
-            Iterator: Um iterador sobre os vértices.
-
-        Exemplo:
-            >>> lista = ListaDeVertices()
-            >>> v1 = Vertice("A")
-            >>> v2 = Vertice("B")
-            >>> lista.criar(v1)
-            >>> lista.criar(v2)
-            >>> for v in lista:
-            ...     print(v.nome)
-            A
-            B
-        """
-        for el in self.vertices:
-            yield el
-
-    def __contains__(self, item: Vertice) -> bool:
-        return item in self.vertices
-
-    def __len__(self) -> int:
-        """Retorna o tamanho da lista de vertices
-
-        Returns:
-            int: O tamanho da lista de vertices
-        """
-        return len(self.vertices)
-
-
-@dataclass(frozen=True)
-class MapaDeArcos:
-    """
-    Representa um mapa de arestas (arcos) entre pares de vértices em um grafo.
-
-    Utiliza um dicionário para armazenar os arcos, com chaves sendo tuplas de vértices.
-
-    Atributos:
-        arcos (dict[tuple[Vertice, Vertice], Arco]): Dicionário de arcos.
-    """
-
-    arcos: dict[tuple[Vertice, Vertice], Arco] = field(default_factory=dict)
-
-    def criar(self, v1: Vertice, v2: Vertice, arco: Arco) -> None:
-        """
-        Adiciona um arco entre dois vértices.
-
-        Parâmetros:
-            v1 (Vertice): O primeiro vértice.
-            v2 (Vertice): O segundo vértice.
-            arco (Arco): O arco a ser associado aos vértices.
-
-        Retorna:
-            None
-
-        Exemplo:
-            >>> mapa = MapaDeArcos()
-            >>> v1 = Vertice("A")
-            >>> v2 = Vertice("B")
-            >>> arco = Arco(peso=2.5)
-            >>> mapa.criar(v1, v2, arco)
-            >>> mapa.arcos[(v1, v2)].peso
-            2.5
-        """
-        self.arcos[(v1, v2)] = arco
-
-    def values(self) -> ValuesView[Arco]:
-        """
-        Retorna uma visão dos valores (arcos) no dicionário.
-
-        Retorna:
-            ValuesView[Arco]: Uma visão dos arcos armazenados.
-
-        Exemplo:
-            >>> mapa = MapaDeArcos()
-            >>> v1 = Vertice("A")
-            >>> v2 = Vertice("B")
-            >>> arco = Arco(peso=2.5)
-            >>> mapa.criar(v1, v2, arco)
-            >>> for a in mapa.values():
-            ...     print(a.peso)
-            2.5
-        """
-        return self.arcos.values()
-
-    def __get_item__(self, item: tuple[Vertice, Vertice]) -> Arco:
-        return self.arcos[item]
-
-    def __set_item__(self, key: tuple[Vertice, Vertice], new_val: Arco) -> None:
-        """
-        Define um novo valor para um arco específico.
-
-        Parâmetros:
-            key (tuple[Vertice, Vertice]): A chave representando o par de vértices.
-            new_val (Arco): O novo arco a ser associado.
-
-        Retorna:
-            None
-
-        Exemplo:
-            >>> mapa = MapaDeArcos()
-            >>> v1 = Vertice("A")
-            >>> v2 = Vertice("B")
-            >>> arco1 = Arco(peso=1.0)
-            >>> arco2 = Arco(peso=2.0)
-            >>> mapa.criar(v1, v2, arco1)
-            >>> mapa.__set_item__((v1, v2), arco2)
-            >>> mapa.arcos[(v1, v2)].peso
-            2.0
-        """
-        self.arcos[key] = new_val
-
-    def __contains__(self, item: tuple[Vertice, Vertice]) -> bool:
-        return item in self.arcos
-
-
+# region funções
 def g(
     grafo: Grafo, *_to: tuple[Vertice, Vertice, PesoArco] | tuple[Vertice, Vertice]
 ) -> None:
@@ -402,6 +181,261 @@ def mostrar_matriz_adjacencia(grafo: Grafo, clear_screen: bool = False) -> None:
     print("=" * (largura_rotulo + 1) + "+" + "=" * ((largura_valor + 1) * n - 1))
 
 
+# endregion
+
+
+# region vertice
+@dataclass(frozen=True, order=True)
+class Vertice:
+    """
+    Representa um vértice em um grafo.
+
+    Esta classe é imutável (frozen) e pode ser ordenada com base no atributo 'nome'.
+
+    Atributos:
+        nome (str): O nome único do vértice.
+    """
+
+    nome: str
+
+    def __format__(self, format_spec: str) -> str:
+        """
+        Formata o vértice de acordo com a especificação de formato fornecida.
+
+        Especificações de formato suportadas:
+            - 'n' ou '' (vazio): Retorna apenas o nome do vértice.
+            - 'f': Retorna uma representação completa (nome e id).
+            - 'i': Retorna apenas o id do vértice (neste caso, igual ao nome).
+            - Um número (ex: '3'): Retorna o nome do vértice com padding para a largura especificada.
+
+        Parâmetros:
+            format_spec (str): A especificação de formato a ser usada.
+
+        Retorna:
+            str: A representação formatada do vértice.
+
+        Levanta:
+            ValueError: Se a especificação de formato for desconhecida.
+
+        Exemplos:
+            >>> v = Vertice("A")
+            >>> f"{v:n}"  # ou f"{v}"
+            'A'
+            >>> f"{v:f}"
+            'A (id=A)'
+            >>> f"{v:i}"
+            'A'
+            >>> f"{v:3}"
+            'A  '  # padded to width 3
+        """
+        try:
+            width = int(format_spec)
+            return f"{self.nome:{width}}"
+        except ValueError:
+            if not format_spec or format_spec == "n":
+                return self.nome
+            elif format_spec == "f":
+                return f"{self.nome} (id={self.nome})"
+            elif format_spec == "i":
+                return self.nome
+            else:
+                raise ValueError(f"Unknown format code '{format_spec}' for Vertice")
+
+
+# endregion
+
+
+# region arco
+@dataclass(frozen=True, order=True)
+class Arco:
+    """
+    Representa uma aresta (arco) entre dois vértices em um grafo.
+
+    Esta classe é imutável (frozen).
+
+    Atributos:
+        peso (float): O peso da aresta. Valor padrão é 1.0.
+    """
+
+    origem: Vertice
+    destino: Vertice
+    peso: float = field(default=1.0)
+
+
+# endregion
+
+
+# region lista de vertices
+@dataclass(frozen=True)
+class ListaDeVertices:
+    """
+    Representa uma coleção de vértices em um grafo.
+
+    Utiliza um conjunto para armazenar os vértices, garantindo unicidade.
+
+    Atributos:
+        vertices (set[Vertice]): Conjunto de vértices.
+    """
+
+    vertices: set[Vertice] = field(default_factory=set)
+
+    def verificar_existencia(self, _v: Vertice, /) -> bool:
+        """Verifica se um vertice existe dentro da lista.
+
+        Args:
+            _v (Vertice): O vertice para ser verificado
+
+        Returns:
+            bool: returna True caso exista, False caso contrário.
+        """
+        return _v in self.vertices
+
+    def criar(self, _v: Vertice, /) -> None:
+        """
+        Adiciona um vértice à coleção.
+
+        Parâmetros:
+            _v (Vertice): O vértice a ser adicionado (parâmetro apenas posicional).
+
+        Retorna:
+            None
+
+        Exemplo:
+            >>> lista = ListaDeVertices()
+            >>> v = Vertice("A")
+            >>> lista.criar(v)
+            >>> len(lista.vertices)
+            1
+        """
+        self.vertices.add(_v)
+
+    def __iter__(self) -> Iterator[Vertice]:
+        """
+        Retorna um iterador sobre os vértices na coleção.
+
+        Retorna:
+            Iterator: Um iterador sobre os vértices.
+
+        Exemplo:
+            >>> lista = ListaDeVertices()
+            >>> v1 = Vertice("A")
+            >>> v2 = Vertice("B")
+            >>> lista.criar(v1)
+            >>> lista.criar(v2)
+            >>> for v in lista:
+            ...     print(v.nome)
+            A
+            B
+        """
+        for el in self.vertices:
+            yield el
+
+    def __contains__(self, item: Vertice) -> bool:
+        return item in self.vertices
+
+    def __len__(self) -> int:
+        """Retorna o tamanho da lista de vertices
+
+        Returns:
+            int: O tamanho da lista de vertices
+        """
+        return len(self.vertices)
+
+
+# endregion
+
+
+# region mapa de arcos
+@dataclass(frozen=True)
+class MapaDeArcos:
+    """
+    Representa um mapa de arestas (arcos) entre pares de vértices em um grafo.
+
+    Utiliza um dicionário para armazenar os arcos, com chaves sendo tuplas de vértices.
+
+    Atributos:
+        arcos (dict[tuple[Vertice, Vertice], Arco]): Dicionário de arcos.
+    """
+
+    arcos: dict[tuple[Vertice, Vertice], Arco] = field(default_factory=dict)
+
+    def criar(self, v1: Vertice, v2: Vertice, arco: Arco) -> None:
+        """
+        Adiciona um arco entre dois vértices.
+
+        Parâmetros:
+            v1 (Vertice): O primeiro vértice.
+            v2 (Vertice): O segundo vértice.
+            arco (Arco): O arco a ser associado aos vértices.
+
+        Retorna:
+            None
+
+        Exemplo:
+            >>> mapa = MapaDeArcos()
+            >>> v1 = Vertice("A")
+            >>> v2 = Vertice("B")
+            >>> arco = Arco(peso=2.5)
+            >>> mapa.criar(v1, v2, arco)
+            >>> mapa.arcos[(v1, v2)].peso
+            2.5
+        """
+        self.arcos[(v1, v2)] = arco
+
+    def values(self) -> ValuesView[Arco]:
+        """
+        Retorna uma visão dos valores (arcos) no dicionário.
+
+        Retorna:
+            ValuesView[Arco]: Uma visão dos arcos armazenados.
+
+        Exemplo:
+            >>> mapa = MapaDeArcos()
+            >>> v1 = Vertice("A")
+            >>> v2 = Vertice("B")
+            >>> arco = Arco(peso=2.5)
+            >>> mapa.criar(v1, v2, arco)
+            >>> for a in mapa.values():
+            ...     print(a.peso)
+            2.5
+        """
+        return self.arcos.values()
+
+    def __get_item__(self, item: tuple[Vertice, Vertice]) -> Arco:
+        return self.arcos[item]
+
+    def __set_item__(self, key: tuple[Vertice, Vertice], new_val: Arco) -> None:
+        """
+        Define um novo valor para um arco específico.
+
+        Parâmetros:
+            key (tuple[Vertice, Vertice]): A chave representando o par de vértices.
+            new_val (Arco): O novo arco a ser associado.
+
+        Retorna:
+            None
+
+        Exemplo:
+            >>> mapa = MapaDeArcos()
+            >>> v1 = Vertice("A")
+            >>> v2 = Vertice("B")
+            >>> arco1 = Arco(peso=1.0)
+            >>> arco2 = Arco(peso=2.0)
+            >>> mapa.criar(v1, v2, arco1)
+            >>> mapa.__set_item__((v1, v2), arco2)
+            >>> mapa.arcos[(v1, v2)].peso
+            2.0
+        """
+        self.arcos[key] = new_val
+
+    def __contains__(self, item: tuple[Vertice, Vertice]) -> bool:
+        return item in self.arcos
+
+
+# endregion
+
+
+# region grafo
 @dataclass(frozen=True)
 class Grafo:
     """
@@ -429,6 +463,10 @@ class Grafo:
     arcos: MapaDeArcos = field(default_factory=MapaDeArcos)
 
 
+# endregion
+
+
+# region calculadora de grafo
 @dataclass(frozen=True)
 class CalculadoraDeGrafo:
     grafo: Grafo
@@ -541,6 +579,10 @@ class CalculadoraDeGrafo:
         return comprimentos
 
 
+# endregion
+
+
+# region main
 def main() -> None:
     """Ponto de partida do script"""
     # Instanciar o grafo
@@ -562,4 +604,16 @@ def main() -> None:
     calculadora = CalculadoraDeGrafo(grafo)
 
     mostrar_matriz_adjacencia(grafo, clear_screen=True)
-    print(calculadora.calcular_possibilidades_caminhos(v1, v2))
+    logger.debug(pformat(calculadora.calcular_possibilidades_caminhos(v1, v2)))
+
+
+# endregion
+
+# region script
+if __name__ == "__main__":
+    import timeit
+
+    beginning = timeit.default_timer()
+    main()
+    logger.debug(f"Execução finalizada em {(timeit.default_timer() - beginning):.2f}s")
+# endregion
