@@ -51,6 +51,8 @@ import timeit
 from collections.abc import Iterator, MutableSequence, MutableSet, Sequence, ValuesView
 from dataclasses import dataclass, field
 from pprint import pformat
+from typing import Annotated, Literal
+from typing_extensions import Doc
 
 type PesoArco = int
 
@@ -154,19 +156,19 @@ def mostrar_matriz_adjacencia(grafo: Grafo, clear_screen: bool = False) -> None:
         print("Grafo vazio")
         return
 
-    largura_rotulo = max(len(v.nome) for v in vertices_ordenados)
+    largura_rotulo = max(len(v.id) for v in vertices_ordenados)
     largura_valor = max(4, len("null"))
 
     print("\n=== Matriz de Adjacência ===")
     print(" " * (largura_rotulo + 1), end="")
     for v in vertices_ordenados:
-        print(f"{v.nome:^{largura_valor}}", end=" ")
+        print(f"{v.id:^{largura_valor}}", end=" ")
     print()
 
     print("=" * (largura_rotulo + 1) + "+" + "=" * ((largura_valor + 1) * n - 1))
 
     for v1 in vertices_ordenados:
-        print(f"{v1.nome:<{largura_rotulo}}", end=" │")
+        print(f"{v1.id:<{largura_rotulo}}", end=" │")
         for v2 in vertices_ordenados:
             arco = grafo.arcos.arcos.get((v1, v2))
             valor = f"{arco.peso:.1f}" if arco else "null"
@@ -196,7 +198,12 @@ class Vertice:
         nome (str): O nome único do vértice.
     """
 
-    nome: str
+    id: str
+    """O identificador do vertice.
+    
+    Exemplos:
+    >>> Vertice("A")
+    """
 
     def __format__(self, format_spec: str) -> str:
         """
@@ -230,14 +237,14 @@ class Vertice:
         """
         try:
             width = int(format_spec)
-            return f"{self.nome:{width}}"
+            return f"{self.id:{width}}"
         except ValueError:
             if not format_spec or format_spec == "n":
-                return self.nome
+                return self.id
             elif format_spec == "f":
-                return f"{self.nome} (id={self.nome})"
+                return f"{self.id} (id={self.id})"
             elif format_spec == "i":
-                return self.nome
+                return self.id
             else:
                 raise ValueError(f"Unknown format code '{format_spec}' for Vertice")
 
@@ -470,6 +477,17 @@ class Grafo:
 @dataclass(frozen=True)
 class CalculadoraDeGrafo:
     grafo: Grafo
+
+    def calcular_menor_distancia(
+        self,
+        origem: Vertice,
+        destino: Vertice,
+        algoritmo: Literal["dijkstra"] | None = None,
+    ) -> float:
+        if algoritmo is None:
+            algoritmo = "dijkstra"
+        # TODO(arthur): implementar o metodo
+        return -1.0
 
     def calcular_possibilidades_caminhos(
         self, v1: Vertice, v2: Vertice, /
