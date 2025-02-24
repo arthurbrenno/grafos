@@ -106,7 +106,7 @@ class Vertice:
                 raise ValueError(f"Unknown format code '{format_spec}' for Vertice")
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class Arco:
     """
     Representa uma aresta (arco) entre dois vértices em um grafo.
@@ -119,15 +119,16 @@ class Arco:
 
     peso: float = field(default=1.0)
 
-    def __add__(self) -> Arco:
+    def __add__(self, other: Arco) -> Arco:
         """Overload para representar a soma de dois arcos.
 
         Returns:
             Arco: O novo arco com os pesos somados
         """
+        return Arco(self.peso + other.peso)
 
 
-@dataclass
+@dataclass(frozen=True)
 class ListaDeVertices:
     """
     Representa uma coleção de vértices em um grafo.
@@ -203,7 +204,7 @@ class ListaDeVertices:
         return len(self.vertices)
 
 
-@dataclass
+@dataclass(frozen=True)
 class MapaDeArcos:
     """
     Representa um mapa de arestas (arcos) entre pares de vértices em um grafo.
