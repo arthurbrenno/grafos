@@ -303,8 +303,6 @@ def g(grafo: Grafo, *_to: tuple[Vertice, Vertice, Arco]) -> None:
         1.5
     """
     for v1, v2, arco in _to:
-        grafo.vertices.criar(v1)
-        grafo.vertices.criar(v2)
         grafo.arcos.criar(v1, v2, arco)
         grafo.arcos.criar(v2, v1, arco)
 
