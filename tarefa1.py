@@ -45,7 +45,7 @@ Para mais detalhes sobre cada classe e seus métodos, consulte as docstrings ind
 from __future__ import annotations
 
 import os
-from collections.abc import Iterator, Sequence, ValuesView
+from collections.abc import Iterator, MutableSet, Sequence, ValuesView
 from dataclasses import dataclass, field
 
 
@@ -171,7 +171,7 @@ class ListaDeVertices:
         """
         self.vertices.add(_v)
 
-    def __iter__(self) -> Iterator:
+    def __iter__(self) -> Iterator[Vertice]:
         """
         Retorna um iterador sobre os vértices na coleção.
 
@@ -435,7 +435,76 @@ class CalculadoraDeGrafo:
     def calcular_possibilidades_caminhos(
         self, v1: Vertice, v2: Vertice, /
     ) -> Sequence[Sequence[Arco]]:
-        """TODO(arthur)"""
+        """
+        Calcula todos os caminhos possíveis entre dois vértices no grafo.
+
+        Esta função implementa uma busca em profundidade (DFS) para encontrar todos os caminhos
+        possíveis entre o vértice de origem v1 e o vértice de destino v2. A função evita ciclos
+        não visitando o mesmo vértice mais de uma vez em um único caminho.
+
+        Args:
+            v1 (Vertice): O vértice de origem (parâmetro posicional).
+            v2 (Vertice): O vértice de destino (parâmetro posicional).
+
+        Returns:
+            Sequence[Sequence[Arco]]: Uma sequência de sequências, onde cada sequência interna
+                                    representa um caminho possível como uma lista de arcos.
+                                    Retorna uma lista vazia se não houver caminhos entre v1 e v2.
+
+        Exemplo:
+            >>> calculadora = CalculadoraDeGrafo(grafo)
+            >>> v1 = Vertice("A")
+            >>> v2 = Vertice("C")
+            >>> caminhos = calculadora.calcular_possibilidades_caminhos(v1, v2)
+            >>> len(caminhos)  # Número de caminhos possíveis
+            2
+        """
+
+        def dfs(
+            atual: Vertice,
+            destino: Vertice,
+            caminho_atual: Sequence[Arco],
+            vertices_visitados: MutableSet[Vertice],
+        ) -> None:
+            # Se chegamos ao destino, adicionamos o caminho atual aos resultados
+            if atual == destino:
+                todos_caminhos.append(list(caminho_atual))
+                return
+
+            # Marcar o vértice atual como visitado
+            vertices_visitados.add(atual)
+
+            # Explorar todos os vértices adjacentes
+            for vertice in self.grafo.vertices:
+                # Verificar se há um arco entre o vértice atual e o vértice candidato
+                if (
+                    atual,
+                    vertice,
+                ) in self.grafo.arcos.arcos and vertice not in vertices_visitados:
+                    # Adicionar o arco ao caminho atual
+                    arco = self.grafo.arcos.arcos[(atual, vertice)]
+                    caminho_atual.append(arco)
+
+                    # Continuar a busca a partir deste novo vértice
+                    dfs(vertice, destino, caminho_atual, vertices_visitados)
+
+                    # Backtracking: remover o último arco adicionado
+                    caminho_atual.pop()
+
+            # Remover o vértice atual dos visitados para permitir explorar outros caminhos
+            vertices_visitados.remove(atual)
+
+        # Lista para armazenar todos os caminhos encontrados
+        todos_caminhos = []
+
+        # Verificar se os vértices existem no grafo
+        if v1 not in self.grafo.vertices or v2 not in self.grafo.vertices:
+            return todos_caminhos  # Retorna lista vazia se um dos vértices não existir
+
+        # Iniciar a busca em profundidade
+        dfs(v1, v2, [], set())
+
+        return todos_caminhos
 
     def calcular_soma_pesos(self, v1: Vertice, v2: Vertice, /) -> Sequence[int]:
         """Calcula a soma de todos os pesos possiveis entre dois vertices do grafo
@@ -484,6 +553,9 @@ grafo.vertices.criar(v2)
 grafo.vertices.criar(v3)
 
 # Associar vertices relacionados
-g(grafo, (v1, v2))
+g(grafo, (v1, v2), (v1, v3), (v3, v2))
+
+calculadora = CalculadoraDeGrafo(grafo)
 
 mostrar_matriz_adjacencia(grafo, clear_screen=True)
+print(calculadora.calcular_possibilidades_caminhos(v1, v2))
