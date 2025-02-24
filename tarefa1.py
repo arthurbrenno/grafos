@@ -478,12 +478,22 @@ class Grafo:
 class CalculadoraDeGrafo:
     grafo: Grafo
 
-    def calcular_menor_distancia(
+    def calcular_menor_distancia_com_pesos(
         self,
         origem: Vertice,
         destino: Vertice,
         algoritmo: Literal["dijkstra"] | None = None,
-    ) -> float:
+    ) -> Sequence[Arco]:
+        """Calcula a menor distancia entre dois vertices, considerando os pesos
+
+        Args:
+            origem (Vertice): vertice de origem
+            destino (Vertice): vertice de destino
+            algoritmo (Literal["dijkstra"] | None, optional): O algoritmo para ser utilizado. O valor padrão é djikstra.
+
+        Returns:
+            Sequence[Arco]: retorna a sequencia de arcos que retorna o menor caminho entre os vertices.
+        """
         if algoritmo is None:
             algoritmo = "dijkstra"
         # TODO(arthur): implementar o metodo
