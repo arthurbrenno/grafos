@@ -12,8 +12,11 @@ class Grafo:
         self.grafo[origem].add(destino)
         self.grafo[destino].add(origem)
 
-    def listar_vizinhos(self, vertice: str) -> Sequence[str]:
-        return self.grafo.get(vertice)
+    def listar_vizinhos(self, vertice: str) -> set[str]:
+        v = self.grafo.get(vertice)
+        if v is None:
+            raise KeyError("Vertice nao encontrado na lista de vertices.")
+        return v
 
 g = Grafo()
 g.criar_vertice("A")

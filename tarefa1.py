@@ -45,8 +45,11 @@ Para mais detalhes sobre cada classe e seus métodos, consulte as docstrings ind
 from __future__ import annotations
 
 import os
-from collections.abc import Iterator, MutableSet, Sequence, ValuesView
+from collections.abc import Iterator, MutableSequence, MutableSet, Sequence, ValuesView
+
 from dataclasses import dataclass, field
+
+type PesoArco = int
 
 
 @dataclass(frozen=True, order=True)
@@ -117,15 +120,9 @@ class Arco:
         peso (float): O peso da aresta. Valor padrão é 1.0.
     """
 
+    origem: Vertice
+    destino: Vertice
     peso: float = field(default=1.0)
-
-    def __add__(self, other: Arco) -> Arco:
-        """Overload para representar a soma de dois arcos.
-
-        Returns:
-            Arco: O novo arco com os pesos somados
-        """
-        return Arco(self.peso + other.peso)
 
 
 @dataclass(frozen=True)
@@ -291,7 +288,7 @@ class MapaDeArcos:
 
 
 def g(
-    grafo: Grafo, *_to: tuple[Vertice, Vertice, Arco] | tuple[Vertice, Vertice]
+    grafo: Grafo, *_to: tuple[Vertice, Vertice, PesoArco] | tuple[Vertice, Vertice]
 ) -> None:
     """
     Adiciona vértices e arcos ao grafo a partir de uma lista de tuplas.
@@ -330,7 +327,11 @@ def g(
                 "Primeiro, você deve criar o vértice."
             )
 
-        arco = tup[2] if len(tup) == 3 else Arco()
+        arco = (
+            (Arco(origem=v1, destino=v2, peso=tup[2]))
+            if len(tup) == 3
+            else Arco(origem=v1, destino=v2, peso=1.0)
+        )
 
         grafo.arcos.criar(v1, v2, arco)
         grafo.arcos.criar(v2, v1, arco)
@@ -460,10 +461,13 @@ class CalculadoraDeGrafo:
             2
         """
 
+        # Lista para armazenar todos os caminhos encontrados
+        todos_caminhos: MutableSequence[Sequence[Arco]] = []
+
         def dfs(
             atual: Vertice,
             destino: Vertice,
-            caminho_atual: Sequence[Arco],
+            caminho_atual: MutableSequence[Arco],
             vertices_visitados: MutableSet[Vertice],
         ) -> None:
             # Se chegamos ao destino, adicionamos o caminho atual aos resultados
@@ -494,9 +498,6 @@ class CalculadoraDeGrafo:
             # Remover o vértice atual dos visitados para permitir explorar outros caminhos
             vertices_visitados.remove(atual)
 
-        # Lista para armazenar todos os caminhos encontrados
-        todos_caminhos = []
-
         # Verificar se os vértices existem no grafo
         if v1 not in self.grafo.vertices or v2 not in self.grafo.vertices:
             return todos_caminhos  # Retorna lista vazia se um dos vértices não existir
@@ -506,7 +507,7 @@ class CalculadoraDeGrafo:
 
         return todos_caminhos
 
-    def calcular_soma_pesos(self, v1: Vertice, v2: Vertice, /) -> Sequence[int]:
+    def calcular_soma_pesos(self, v1: Vertice, v2: Vertice, /) -> Sequence[float]:
         """Calcula a soma de todos os pesos possiveis entre dois vertices do grafo
 
         Args:
@@ -517,12 +518,13 @@ class CalculadoraDeGrafo:
             Sequence[int]: retorna uma Sequencia com todas as somas de cada peso possivel.
         """
         possibilidades = self.calcular_possibilidades_caminhos(v1, v2)
-        pesos = []
+        pesos: MutableSequence[float] = []
         for possibilidade in possibilidades:
-            soma_pesos = 0
+            soma_pesos: float = 0.0
             for arco in possibilidade:
                 soma_pesos += arco.peso
             pesos.append(soma_pesos)
+        return pesos
 
     def calcular_soma_comprimentos(self, v1: Vertice, v2: Vertice, /) -> Sequence[int]:
         """Calcula todos os comprimentos possiveis entre dois vertices do grafo
@@ -539,23 +541,25 @@ class CalculadoraDeGrafo:
         return comprimentos
 
 
-# Instanciar o grafo
-grafo = Grafo()
+def main() -> None:
+    """Ponto de partida do script"""
+    # Instanciar o grafo
+    grafo = Grafo()
 
-# Criar vertices.
-v1 = Vertice("A")
-v2 = Vertice("B")
-v3 = Vertice("C")
+    # Criar vertices.
+    v1 = Vertice("A")
+    v2 = Vertice("B")
+    v3 = Vertice("C")
 
-# Adicionar vertices no grafo
-grafo.vertices.criar(v1)
-grafo.vertices.criar(v2)
-grafo.vertices.criar(v3)
+    # Adicionar vertices no grafo
+    grafo.vertices.criar(v1)
+    grafo.vertices.criar(v2)
+    grafo.vertices.criar(v3)
 
-# Associar vertices relacionados
-g(grafo, (v1, v2), (v1, v3), (v3, v2))
+    # Associar vertices relacionados
+    g(grafo, (v1, v2), (v1, v3), (v3, v2))
 
-calculadora = CalculadoraDeGrafo(grafo)
+    calculadora = CalculadoraDeGrafo(grafo)
 
-mostrar_matriz_adjacencia(grafo, clear_screen=True)
-print(calculadora.calcular_possibilidades_caminhos(v1, v2))
+    mostrar_matriz_adjacencia(grafo, clear_screen=True)
+    print(calculadora.calcular_possibilidades_caminhos(v1, v2))
