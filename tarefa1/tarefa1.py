@@ -16,7 +16,9 @@ Classes Principais
 Uso Básico
 ----------
 
-Para criar um grafo, instancie a classe `Grafo` e use o método `g` para adicionar vértices e arcos. Você pode visualizar a matriz de adjacência do grafo chamando o método `mostrar_matriz_adjacencia`.
+Para criar um grafo, instancie a classe `Grafo` e use o método `g` para adicionar vértices e arcos.
+Você pode visualizar a matriz de adjacência do grafo chamando o método `mostrar_matriz_adjacencia`.
+Para uma visualização gráfica interativa, use o método `visualizar_grafo`.
 
 Exemplo:
 
@@ -28,6 +30,7 @@ Exemplo:
     arco = Arco(peso=1.5)
     grafo.g((v1, v2, arco))
     grafo.mostrar_matriz_adjacencia()
+    grafo.visualizar_grafo()  # Visualização gráfica (requer pyvis e PyQt5)
 
 Detalhes das Classes
 --------------------
@@ -44,17 +47,19 @@ Para mais detalhes sobre cada classe e seus métodos, consulte as docstrings ind
 
 from __future__ import annotations
 
+import importlib
+import importlib.util
 import logging
 import logging.config
 import os
-import pprint
+import sys
+import tempfile
 import timeit
 from collections.abc import Iterator, MutableSequence, MutableSet, Sequence, ValuesView
 from dataclasses import dataclass, field
-from pprint import pformat
 from typing import Literal
 
-type PesoArco = int
+type PesoArco = float
 
 # region logger
 logger = logging.getLogger(__name__)
@@ -66,12 +71,38 @@ console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 # endregion
 
+# region imports condicionais
+# Tenta importar pyvis para visualização do grafo
+pyvis = importlib.util.find_spec("pyvis")
+if pyvis:
+    PYVIS_AVAILABLE = True
+else:
+    logger.debug("AVISO: pyvis não encontrado. Visualização do grafo não disponível.")
+    PYVIS_AVAILABLE = False
+
+# Tenta importar PyQt5 para exibição de janelas
 try:
-    # Importar pyvis para visualização do grafo.
-    import pyvis  # type: ignore
+    from PyQt5.QtCore import QUrl
+    from PyQt5.QtWebEngineWidgets import QWebEngineView
+    from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
+
+    PYQT5_AVAILABLE = True
 except ImportError:
-    logger.debug("AVISO: pyvis nao encontrado. Visualização do grafo não disponível.")
-    pyvis = None
+    logger.debug("AVISO: PyQt5 não encontrado. Visualização em janela não disponível.")
+    PYQT5_AVAILABLE = False
+
+# Tenta importar rich para pretty printing
+try:
+    import rich
+    from rich.console import Console
+    from rich.panel import Panel
+    from rich.table import Table
+
+    RICH_AVAILABLE = True
+except ImportError:
+    logger.debug("AVISO: rich não encontrado. Pretty printing não disponível.")
+    RICH_AVAILABLE = False
+# endregion
 
 
 # region funções
@@ -163,6 +194,31 @@ def mostrar_matriz_adjacencia(grafo: Grafo, clear_screen: bool = False) -> None:
         print("Grafo vazio")
         return
 
+    # Se o rich estiver disponível, usar para exibição mais bonita
+    if RICH_AVAILABLE:
+        console = Console()
+        table = Table(
+            title="Matriz de Adjacência", show_header=True, header_style="bold"
+        )
+
+        # Adicionar cabeçalhos
+        table.add_column("")
+        for v in vertices_ordenados:
+            table.add_column(v.id, justify="center")
+
+        # Adicionar linhas
+        for v1 in vertices_ordenados:
+            row = [v1.id]
+            for v2 in vertices_ordenados:
+                arco = grafo.arcos.arcos.get((v1, v2))
+                valor = f"{arco.peso:.1f}" if arco else "null"
+                row.append(valor)
+            table.add_row(*row)
+
+        console.print(table)
+        return
+
+    # Exibição tradicional se rich não estiver disponível
     largura_rotulo = max(len(v.id) for v in vertices_ordenados)
     largura_valor = max(4, len("null"))
 
@@ -476,6 +532,184 @@ class Grafo:
     vertices: ListaDeVertices = field(default_factory=ListaDeVertices)
     arcos: MapaDeArcos = field(default_factory=MapaDeArcos)
 
+    def g(
+        self, *args: tuple[Vertice, Vertice, PesoArco] | tuple[Vertice, Vertice]
+    ) -> None:
+        """
+        Método wrapper para a função global g.
+
+        Veja a documentação da função g para mais detalhes.
+        """
+        g(self, *args)
+
+    def mostrar_matriz_adjacencia(self, clear_screen: bool = False) -> None:
+        """
+        Método wrapper para a função global mostrar_matriz_adjacencia.
+
+        Veja a documentação da função mostrar_matriz_adjacencia para mais detalhes.
+        """
+        mostrar_matriz_adjacencia(self, clear_screen)
+
+    def visualizar_grafo_navegador(
+        self,
+        titulo: str = "Visualização do Grafo",
+        altura: int = 600,
+        largura: int = 800,
+    ) -> None:
+        """
+        Gera uma visualização do grafo e abre-a diretamente no navegador padrão.
+        Essa alternativa não requer PyQt5, apenas pyvis.
+        """
+        # Verificar se pyvis está disponível
+        if not PYVIS_AVAILABLE:
+            raise ImportError(
+                "A biblioteca pyvis não está instalada.\n"
+                "Por favor, instale-a usando:\n"
+                "pip install pyvis"
+            )
+
+        # Importar as bibliotecas necessárias
+        from pyvis.network import Network
+        import webbrowser
+        import os
+
+        # Criar um grafo pyvis
+        net = Network(altura, largura, directed=False, notebook=False, heading=titulo)
+        net.toggle_physics(True)
+
+        # Adicionar nós ao grafo pyvis
+        for vertice in self.vertices:
+            net.add_node(vertice.id, label=vertice.id, title=f"Vértice: {vertice.id}")
+
+        # Adicionar arestas únicas (sem duplicatas)
+        added_edges = set()
+        for (v1, v2), arco in self.arcos.arcos.items():
+            edge_id = tuple(sorted([v1.id, v2.id]))
+            if edge_id not in added_edges:
+                net.add_edge(
+                    v1.id,
+                    v2.id,
+                    value=arco.peso,
+                    title=f"Peso: {arco.peso}",
+                    label=f"{arco.peso}",
+                )
+                added_edges.add(edge_id)
+
+        # Criar arquivo HTML temporário
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".html")
+        temp_file.close()
+        html_path = temp_file.name
+
+        print(f"Salvando visualização em: {html_path}")
+        net.save_graph(html_path)
+
+        # Verificar se o arquivo foi criado
+        if not os.path.exists(html_path):
+            print(f"Erro: O arquivo HTML não foi criado em {html_path}")
+            return
+
+        # Abrir o arquivo no navegador padrão
+        print(f"Abrindo visualização no navegador: {html_path}")
+        webbrowser.open("file://" + os.path.abspath(html_path))
+
+    def pretty_print(self, titulo: str | None = None) -> None:
+        """
+        Exibe informações sobre o grafo de forma bem formatada,
+        usando a biblioteca rich se disponível.
+
+        Parâmetros:
+            titulo (str): Título da exibição
+
+        Retorna:
+            None
+        """
+        titulo = titulo or "Informações do Grafo"
+        if RICH_AVAILABLE:
+            console = Console()
+
+            # Seção de resumo
+            resumo = Table(show_header=False, box=rich.box.SIMPLE)
+            resumo.add_column("Propriedade", style="bold")
+            resumo.add_column("Valor")
+
+            vertices_count = len(self.vertices)
+            arcos_count = len(
+                {tuple(sorted([v1.id, v2.id])) for (v1, v2) in self.arcos.arcos.keys()}
+            )
+
+            resumo.add_row("Número de vértices", str(vertices_count))
+            resumo.add_row("Número de arcos (único)", str(arcos_count))
+
+            # Calcular peso total e médio
+            pesos = [arco.peso for arco in self.arcos.arcos.values()]
+            peso_total = (
+                sum(pesos) / 2
+            )  # Dividir por 2 pois cada aresta é contada duas vezes
+            peso_medio = peso_total / arcos_count if arcos_count > 0 else 0
+
+            resumo.add_row("Peso total das arestas", f"{peso_total:.2f}")
+            resumo.add_row("Peso médio das arestas", f"{peso_medio:.2f}")
+
+            console.print(Panel(resumo, title=titulo, border_style="green"))
+
+            # Seção de vértices
+            if vertices_count > 0:
+                vertices_table = Table(
+                    title="Vértices", show_header=True, box=rich.box.SIMPLE
+                )
+                vertices_table.add_column("ID", style="bold")
+                vertices_table.add_column("Grau")
+                vertices_table.add_column("Conexões")
+
+                for v in sorted(list(self.vertices.vertices), key=lambda x: x.id):
+                    # Contar conexões para este vértice
+                    conexoes = []
+                    grau = 0
+
+                    for (v1, v2), arco in self.arcos.arcos.items():
+                        if v1 == v:
+                            conexoes.append(f"{v2.id} ({arco.peso:.1f})")
+                            grau += 1
+
+                    vertices_table.add_row(v.id, str(grau), ", ".join(conexoes))
+
+                console.print(vertices_table)
+        else:
+            # Exibição tradicional sem a biblioteca rich
+            print(f"\n=== {titulo} ===")
+            vertices_count = len(self.vertices)
+            arcos_count = len(
+                {tuple(sorted([v1.id, v2.id])) for (v1, v2) in self.arcos.arcos.keys()}
+            )
+
+            print(f"Número de vértices: {vertices_count}")
+            print(f"Número de arcos (único): {arcos_count}")
+
+            # Calcular peso total e médio
+            pesos = [arco.peso for arco in self.arcos.arcos.values()]
+            peso_total = (
+                sum(pesos) / 2
+            )  # Dividir por 2 pois cada aresta é contada duas vezes
+            peso_medio = peso_total / arcos_count if arcos_count > 0 else 0
+
+            print(f"Peso total das arestas: {peso_total:.2f}")
+            print(f"Peso médio das arestas: {peso_medio:.2f}")
+
+            # Listar vértices
+            if vertices_count > 0:
+                print("\nVértices:")
+                for v in sorted(list(self.vertices.vertices), key=lambda x: x.id):
+                    # Contar conexões para este vértice
+                    conexoes = []
+                    grau = 0
+
+                    for (v1, v2), arco in self.arcos.arcos.items():
+                        if v1 == v:
+                            conexoes.append(f"{v2.id} ({arco.peso:.1f})")
+                            grau += 1
+
+                    print(f"  {v.id} - Grau: {grau}, Conexões: {', '.join(conexoes)}")
+
 
 # endregion
 
@@ -627,19 +861,44 @@ def main() -> None:
     v1 = Vertice("A")
     v2 = Vertice("B")
     v3 = Vertice("C")
+    v4 = Vertice("D")
+    v5 = Vertice("E")
 
     # Adicionar vertices no grafo
     grafo.vertices.criar(v1)
     grafo.vertices.criar(v2)
     grafo.vertices.criar(v3)
+    grafo.vertices.criar(v4)
+    grafo.vertices.criar(v5)
 
-    # Associar vertices relacionados
-    g(grafo, (v1, v2), (v1, v3), (v3, v2))
+    # Associar vertices relacionados com pesos diferentes
+    grafo.g(
+        (v1, v2, 2.5),
+        (v1, v3, 1.0),
+        (v2, v4, 3.0),
+        (v3, v4, 2.0),
+        (v4, v5, 1.5),
+        (v3, v5, 4.0),
+    )
 
     calculadora = CalculadoraDeGrafo(grafo)
 
-    mostrar_matriz_adjacencia(grafo, clear_screen=True)
-    pprint.pprint(pformat(calculadora.calcular_possibilidades_caminhos(v1, v2)))
+    # Exibir matriz de adjacência
+    grafo.mostrar_matriz_adjacencia(clear_screen=True)
+
+    # Exibir informações do grafo com pretty printing
+    print("\n")
+    grafo.pretty_print("Grafo de Exemplo")
+
+    # Calcular possibilidades de caminhos
+    caminhos = calculadora.calcular_possibilidades_caminhos(v1, v5)
+    print(f"\nCaminhos possíveis de A para E: {len(caminhos)}")
+
+    # Tentar visualizar o grafo
+    try:
+        grafo.visualizar_grafo_navegador(titulo="Exemplo de Grafo")
+    except ImportError as e:
+        print(f"\nNão foi possível visualizar o grafo: {e}")
 
 
 # endregion
