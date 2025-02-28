@@ -47,12 +47,12 @@ from __future__ import annotations
 import logging
 import logging.config
 import os
+import pprint
 import timeit
 from collections.abc import Iterator, MutableSequence, MutableSet, Sequence, ValuesView
 from dataclasses import dataclass, field
 from pprint import pformat
-from typing import Annotated, Literal
-from typing_extensions import Doc
+from typing import Literal
 
 type PesoArco = int
 
@@ -65,6 +65,13 @@ formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messag
 console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 # endregion
+
+try:
+    # Importar pyvis para visualização do grafo.
+    import pyvis  # type: ignore
+except ImportError:
+    logger.debug("AVISO: pyvis nao encontrado. Visualização do grafo não disponível.")
+    pyvis = None
 
 
 # region funções
@@ -632,7 +639,7 @@ def main() -> None:
     calculadora = CalculadoraDeGrafo(grafo)
 
     mostrar_matriz_adjacencia(grafo, clear_screen=True)
-    logger.debug(pformat(calculadora.calcular_possibilidades_caminhos(v1, v2)))
+    pprint.pprint(pformat(calculadora.calcular_possibilidades_caminhos(v1, v2)))
 
 
 # endregion
