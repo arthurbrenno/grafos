@@ -52,7 +52,6 @@ import importlib.util
 import logging
 import logging.config
 import os
-import sys
 import tempfile
 import timeit
 from collections.abc import Iterator, MutableSequence, MutableSet, Sequence, ValuesView
@@ -82,9 +81,9 @@ else:
 
 # Tenta importar PyQt5 para exibição de janelas
 try:
-    from PyQt5.QtCore import QUrl
-    from PyQt5.QtWebEngineWidgets import QWebEngineView
-    from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
+    QUrl = importlib.util.find_spec("PyQt5.QtCore.QUrl")
+    QWebEngineView = importlib.util.find_spec("PyQt5.QtWebEngineWidgets.QWebEngineView")
+    QtWidgets = importlib.util.find_spec("PyQt5.QtWidgets")
 
     PYQT5_AVAILABLE = True
 except ImportError:
@@ -858,20 +857,31 @@ def main() -> None:
     grafo = Grafo()
 
     # Criar vertices.
-    v1 = Vertice("A")
-    v2 = Vertice("B")
-    v3 = Vertice("C")
+    va = Vertice("A")
+    vb = Vertice("B")
+    vc = Vertice("C")
+    vd = Vertice("D")
+    ve = Vertice("E")
+    vf = Vertice("F")
+    vg = Vertice("G")
+    vh = Vertice("H")
 
     # Adicionar vertices no grafo
-    grafo.vertices.criar(v1)
-    grafo.vertices.criar(v2)
-    grafo.vertices.criar(v3)
+    grafo.vertices.criar(va)
+    grafo.vertices.criar(vb)
+    grafo.vertices.criar(vc)
+    grafo.vertices.criar(vd)
+    grafo.vertices.criar(ve)
+    grafo.vertices.criar(vf)
+    grafo.vertices.criar(vg)
+    grafo.vertices.criar(vh)
 
     # Associar vertices relacionados com pesos diferentes
-    grafo.g(
-        (v1, v2, 2.5),
-        (v1, v3, 1.0),
-        (v2, v3, 3.0),
+    g(
+        grafo,
+        (va, vb, 10),
+        (va, vc, 15),
+        (vb, ve, 25),
     )
 
     calculadora = CalculadoraDeGrafo(grafo)
@@ -884,12 +894,12 @@ def main() -> None:
     grafo.pretty_print("Grafo de Exemplo")
 
     # Calcular possibilidades de caminhos
-    caminhos = calculadora.calcular_possibilidades_caminhos(v1, v3)
+    caminhos = calculadora.calcular_possibilidades_caminhos(va, vb)
     print(f"\nCaminhos possíveis de A para E: {len(caminhos)}")
 
     # Tentar visualizar o grafo
     try:
-        #grafo.visualizar_grafo_navegador(titulo="Exemplo de Grafo")
+        # grafo.visualizar_grafo_navegador(titulo="Exemplo de Grafo")
         pass
     except ImportError as e:
         print(f"\nNão foi possível visualizar o grafo: {e}")
