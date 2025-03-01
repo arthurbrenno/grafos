@@ -103,10 +103,15 @@ except ImportError:
     RICH_AVAILABLE = False
 # endregion
 
+DirecaoArco = Literal["bidirecional", "origem", "destino", "sem_direcao"]
+
 
 # region funções
 def g(
-    grafo: Grafo, *_to: tuple[Vertice, Vertice, PesoArco] | tuple[Vertice, Vertice]
+    grafo: Grafo,
+    *_to: tuple[Vertice, Vertice, PesoArco, DirecaoArco]
+    | tuple[Vertice, Vertice, PesoArco]
+    | tuple[Vertice, Vertice],
 ) -> None:
     """
     Adiciona vértices e arcos ao grafo a partir de uma lista de tuplas.
@@ -146,9 +151,11 @@ def g(
             )
 
         arco = (
-            (Arco(origem=v1, destino=v2, peso=tup[2]))
+            (Arco(origem=v1, destino=v2, peso=tup[2], direcao=tup[3]))
+            if len(tup) == 4
+            else Arco(origem=v1, destino=v2, peso=tup[2], direcao="sem_direcao")
             if len(tup) == 3
-            else Arco(origem=v1, destino=v2, peso=1.0)
+            else Arco(origem=v1, destino=v2, peso=1.0, direcao="sem_direcao")
         )
 
         grafo.arcos.criar(v1, v2, arco)
@@ -313,7 +320,6 @@ class Vertice:
 
 # endregion
 
-DirecaoArco = Literal["bidirecional", "origem", "destino", "sem_direcao"]
 
 # region arco
 @dataclass(frozen=True, order=True)
@@ -329,9 +335,7 @@ class Arco:
 
     origem: Vertice
     destino: Vertice
-    direcao: DirecaoArco = field(
-        default_factory=lambda: "sem_direcao"
-    )
+    direcao: DirecaoArco = field(default_factory=lambda: "sem_direcao")
     peso: float = field(default=1.0)
 
 
