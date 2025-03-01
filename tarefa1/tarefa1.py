@@ -313,6 +313,7 @@ class Vertice:
 
 # endregion
 
+DirecaoArco = Literal["bidirecional", "origem", "destino", "sem_direcao"]
 
 # region arco
 @dataclass(frozen=True, order=True)
@@ -327,10 +328,10 @@ class Arco:
     """
 
     origem: Vertice
-    direcao: Literal["bidirecional", "origem", "destino", "sem_direcao"] = field(
+    destino: Vertice
+    direcao: DirecaoArco = field(
         default_factory=lambda: "sem_direcao"
     )
-    destino: Vertice
     peso: float = field(default=1.0)
 
 
