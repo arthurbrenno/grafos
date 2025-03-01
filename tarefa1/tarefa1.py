@@ -861,24 +861,17 @@ def main() -> None:
     v1 = Vertice("A")
     v2 = Vertice("B")
     v3 = Vertice("C")
-    v4 = Vertice("D")
-    v5 = Vertice("E")
 
     # Adicionar vertices no grafo
     grafo.vertices.criar(v1)
     grafo.vertices.criar(v2)
     grafo.vertices.criar(v3)
-    grafo.vertices.criar(v4)
-    grafo.vertices.criar(v5)
 
     # Associar vertices relacionados com pesos diferentes
     grafo.g(
         (v1, v2, 2.5),
         (v1, v3, 1.0),
-        (v2, v4, 3.0),
-        (v3, v4, 2.0),
-        (v4, v5, 1.5),
-        (v3, v5, 4.0),
+        (v2, v3, 3.0),
     )
 
     calculadora = CalculadoraDeGrafo(grafo)
@@ -891,12 +884,13 @@ def main() -> None:
     grafo.pretty_print("Grafo de Exemplo")
 
     # Calcular possibilidades de caminhos
-    caminhos = calculadora.calcular_possibilidades_caminhos(v1, v5)
+    caminhos = calculadora.calcular_possibilidades_caminhos(v1, v3)
     print(f"\nCaminhos possíveis de A para E: {len(caminhos)}")
 
     # Tentar visualizar o grafo
     try:
-        grafo.visualizar_grafo_navegador(titulo="Exemplo de Grafo")
+        #grafo.visualizar_grafo_navegador(titulo="Exemplo de Grafo")
+        pass
     except ImportError as e:
         print(f"\nNão foi possível visualizar o grafo: {e}")
 
