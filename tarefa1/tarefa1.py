@@ -863,14 +863,6 @@ def main() -> None:
     caminhos = calculadora.calcular_possibilidades_caminhos(va, vb)
     print(f"\nCaminhos possíveis de A para E: {len(caminhos)}")
 
-    # Tentar visualizar o grafo
-    try:
-        # grafo.visualizar_grafo_navegador(titulo="Exemplo de Grafo")
-        pass
-    except ImportError as e:
-        print(f"\nNão foi possível visualizar o grafo: {e}")
-
-
 # endregion
 
 # region script
