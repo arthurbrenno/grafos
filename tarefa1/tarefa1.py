@@ -539,24 +539,6 @@ class Grafo:
     vertices: ListaDeVertices = field(default_factory=ListaDeVertices)
     arcos: MapaDeArcos = field(default_factory=MapaDeArcos)
 
-    def g(
-        self, *args: tuple[Vertice, Vertice, PesoArco] | tuple[Vertice, Vertice]
-    ) -> None:
-        """
-        Método wrapper para a função global g.
-
-        Veja a documentação da função g para mais detalhes.
-        """
-        g(self, *args)
-
-    def mostrar_matriz_adjacencia(self, clear_screen: bool = False) -> None:
-        """
-        Método wrapper para a função global mostrar_matriz_adjacencia.
-
-        Veja a documentação da função mostrar_matriz_adjacencia para mais detalhes.
-        """
-        mostrar_matriz_adjacencia(self, clear_screen)
-
     def visualizar_grafo_navegador(
         self,
         titulo: str = "Visualização do Grafo",
@@ -725,27 +707,6 @@ class Grafo:
 @dataclass(frozen=True)
 class CalculadoraDeGrafo:
     grafo: Grafo
-
-    def calcular_menor_distancia_com_pesos(
-        self,
-        origem: Vertice,
-        destino: Vertice,
-        algoritmo: Literal["dijkstra"] | None = None,
-    ) -> Sequence[Arco]:
-        """Calcula a menor distancia entre dois vertices, considerando os pesos
-
-        Args:
-            origem (Vertice): vertice de origem
-            destino (Vertice): vertice de destino
-            algoritmo (Literal["dijkstra"] | None, optional): O algoritmo para ser utilizado. O valor padrão é djikstra.
-
-        Returns:
-            Sequence[Arco]: retorna a sequencia de arcos que retorna o menor caminho entre os vertices.
-        """
-        if algoritmo is None:
-            algoritmo = "dijkstra"
-        # TODO(arthur): implementar o metodo
-        return -1.0
 
     def calcular_possibilidades_caminhos(
         self, v1: Vertice, v2: Vertice, /
