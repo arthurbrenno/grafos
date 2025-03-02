@@ -58,8 +58,6 @@ from collections.abc import Iterator, MutableSequence, MutableSet, Sequence, Val
 from dataclasses import dataclass, field
 from typing import Literal
 
-type PesoArco = float
-
 # region logger
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -92,7 +90,8 @@ except ImportError:
     RICH_AVAILABLE = False
 # endregion
 
-DirecaoArco = Literal["bidirecional", "origem", "destino", "sem_direcao"]
+type DirecaoArco = Literal["bidirecional", "origem", "destino", "sem_direcao"]
+type PesoArco = float
 
 
 # region funções
@@ -851,6 +850,7 @@ def main() -> None:
     # Calcular possibilidades de caminhos
     caminhos = calculadora.calcular_possibilidades_caminhos(va, vb)
     print(f"\nCaminhos possíveis de A para E: {len(caminhos)}")
+
 
 # endregion
 
