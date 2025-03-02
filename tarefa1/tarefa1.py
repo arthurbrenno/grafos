@@ -677,6 +677,7 @@ def main() -> None:
     calculadora = CalculadoraDeGrafo(grafo)
     # Calcular possibilidades de caminhos
     caminhos = calculadora.calcular_possibilidades_caminhos(va, vb)
+    mostrar_matriz_adjacencia(grafo, True)
     print(f"\nCaminhos possíveis de A para E: {len(caminhos)}")
 
 
