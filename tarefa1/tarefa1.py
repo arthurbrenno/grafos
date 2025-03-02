@@ -79,17 +79,6 @@ else:
     logger.debug("AVISO: pyvis não encontrado. Visualização do grafo não disponível.")
     PYVIS_AVAILABLE = False
 
-# Tenta importar PyQt5 para exibição de janelas
-try:
-    QUrl = importlib.util.find_spec("PyQt5.QtCore.QUrl")
-    QWebEngineView = importlib.util.find_spec("PyQt5.QtWebEngineWidgets.QWebEngineView")
-    QtWidgets = importlib.util.find_spec("PyQt5.QtWidgets")
-
-    PYQT5_AVAILABLE = True
-except ImportError:
-    logger.debug("AVISO: PyQt5 não encontrado. Visualização em janela não disponível.")
-    PYQT5_AVAILABLE = False
-
 # Tenta importar rich para pretty printing
 try:
     import rich
