@@ -183,6 +183,10 @@ def mostrar_matriz_adjacencia(grafo: Grafo, clear_screen: bool = False) -> None:
 
     # Se o rich estiver disponível, usar para exibição mais bonita
     if RICH_AVAILABLE:
+        loader = rich.loader()
+        if loader is None:
+            raise RuntimeError("Loader not found.")
+
         console = rich.Console()
         table = rich.Table(
             title="Matriz de Adjacência", show_header=True, header_style="bold"
