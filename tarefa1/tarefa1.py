@@ -52,7 +52,6 @@ import importlib.util
 import logging
 import logging.config
 import os
-import tempfile
 import timeit
 from collections.abc import Iterator, MutableSequence, MutableSet, Sequence, ValuesView
 from dataclasses import dataclass, field
@@ -70,22 +69,16 @@ logger.addHandler(console_handler)
 
 # region imports condicionais
 # Tenta importar pyvis para visualização do grafo
-pyvis = importlib.util.find_spec("pyvis")
-if pyvis:
+if pyvis := importlib.util.find_spec("pyvis"):
     PYVIS_AVAILABLE = True
 else:
     logger.debug("AVISO: pyvis não encontrado. Visualização do grafo não disponível.")
     PYVIS_AVAILABLE = False
 
 # Tenta importar rich para pretty printing
-try:
-    import rich
-    from rich.console import Console
-    from rich.panel import Panel
-    from rich.table import Table
-
+if rich := importlib.util.find_spec("rich"):
     RICH_AVAILABLE = True
-except ImportError:
+else:
     logger.debug("AVISO: rich não encontrado. Pretty printing não disponível.")
     RICH_AVAILABLE = False
 # endregion
@@ -190,8 +183,8 @@ def mostrar_matriz_adjacencia(grafo: Grafo, clear_screen: bool = False) -> None:
 
     # Se o rich estiver disponível, usar para exibição mais bonita
     if RICH_AVAILABLE:
-        console = Console()
-        table = Table(
+        console = rich.Console()
+        table = rich.Table(
             title="Matriz de Adjacência", show_header=True, header_style="bold"
         )
 
