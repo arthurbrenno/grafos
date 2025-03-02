@@ -786,7 +786,7 @@ class CalculadoraDeGrafo:
         ) -> None:
             # Se chegamos ao destino, adicionamos o caminho atual aos resultados
             if atual == destino:
-                todos_caminhos.append(list(caminho_atual))
+                todos_caminhos.append(caminho_atual)
                 return
 
             # Marcar o vértice atual como visitado
@@ -894,12 +894,9 @@ def main() -> None:
 
     calculadora = CalculadoraDeGrafo(grafo)
 
-    # Exibir matriz de adjacência
-    grafo.mostrar_matriz_adjacencia(clear_screen=True)
-
     # Exibir informações do grafo com pretty printing
     print("\n")
-    grafo.pretty_print("Grafo de Exemplo")
+    grafo.pretty_print()
 
     # Calcular possibilidades de caminhos
     caminhos = calculadora.calcular_possibilidades_caminhos(va, vb)
