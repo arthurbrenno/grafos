@@ -1,5 +1,5 @@
 type DestinoEPeso = tuple[str, float]
-type CaminhosPossiveis = list[DestinoEPeso]
+type CaminhoPossivel = list[DestinoEPeso]
 
 
 class Grafo:
@@ -117,7 +117,7 @@ class Grafo:
         destino: str,
         caminho_atual: list[DestinoEPeso] | None = None,
         visitados: set[str] | None = None,
-    ) -> list[CaminhosPossiveis]:
+    ) -> list[CaminhoPossivel]:
         """
         Calcula todos os caminhos possíveis entre dois vértices usando busca em profundidade.
 
@@ -129,7 +129,7 @@ class Grafo:
             visitados (set[str] | None): Conjunto de vértices já visitados. Padrão é None.
 
         Returns:
-            list[CaminhosPossiveis]: Lista de todos os caminhos possíveis entre origem e destino.
+            list[CaminhoPossivel]: Lista de todos os caminhos possíveis entre origem e destino.
                                      Cada caminho é uma lista de tuplas (vértice, peso).
         """
         # Inicializar valores padrão
@@ -147,7 +147,7 @@ class Grafo:
             return [caminho_atual]
 
         # Lista para armazenar todos os caminhos encontrados
-        caminhos: list[CaminhosPossiveis] = []
+        caminhos: list[CaminhoPossivel] = []
 
         # Explorar todos os vértices adjacentes
         for proximo_destino in self.grafo[origem]:
@@ -174,12 +174,12 @@ class Grafo:
 
         return caminhos
 
-    def mostrar_caminhos_possiveis(self, caminhos: list[CaminhosPossiveis]) -> None:
+    def mostrar_caminhos_possiveis(self, caminhos: list[CaminhoPossivel]) -> None:
         """
         Exibe todos os caminhos possíveis entre dois vértices, com seus respectivos pesos.
 
         Args:
-            caminhos (CaminhosPossiveis): Lista de caminhos a serem exibidos.
+            caminhos (CaminhoPossivel): Lista de caminhos a serem exibidos.
                                                 Cada caminho é uma lista de tuplas (vértice, peso).
         """
         import os
