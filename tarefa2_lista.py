@@ -181,8 +181,6 @@ class Grafo:
 
         for i, caminho in enumerate(caminhos, 1):
             print(f"Caminho {i}:", end=" ")
-            # O primeiro vértice não está no caminho, então precisamos adicioná-lo
-            print("A →", end=" ")
             peso_total = 0
             for destino, peso in caminho:
                 print(f"{destino} ({peso}) →", end=" ")
