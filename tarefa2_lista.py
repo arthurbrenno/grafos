@@ -25,6 +25,21 @@ class Grafo:
 
         self.grafo[origem.upper()].add((destino.upper(), peso))
 
+    def obter_peso_vertices_adjacentes(self, origem: str, destino: str) -> float:
+        if origem not in self.grafo.keys():
+            raise RuntimeError("A origem não foi cadastrada.")
+
+        destinos = self.grafo[origem]
+        peso: float | None = None
+        for _dest in destinos:
+            if destino == _dest[0]:
+                peso = _dest[1]
+
+        if peso is None:
+            raise RuntimeError("Os vertices não são adjacentes.")
+
+        return peso
+
     def visualizar(self) -> None:
         import os
 
