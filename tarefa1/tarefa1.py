@@ -477,6 +477,160 @@ class Grafo:
 class CalculadoraDeGrafo:
     grafo: Grafo
 
+    def calcular_caminho_minimo_dijkstra(
+        self, origem: Vertice, /
+    ) -> dict[Vertice, tuple[float, list[Vertice]]]:
+        """
+        Implementa o algoritmo de Dijkstra para encontrar o caminho mais curto
+        a partir de um vértice de origem para todos os outros vértices do grafo.
+
+        Args:
+            origem (Vertice): O vértice de origem (parâmetro posicional).
+
+        Returns:
+            dict[Vertice, tuple[float, list[Vertice]]]: Um dicionário onde as chaves são os vértices
+            e os valores são tuplas contendo o custo mínimo para alcançar o vértice
+            e o caminho (lista de vértices) a partir da origem.
+
+        Exemplo:
+            >>> calculadora = CalculadoraDeGrafo(grafo)
+            >>> origem = Vertice("A")
+            >>> resultado = calculadora.calcular_caminho_minimo_dijkstra(origem)
+            >>> for vertice, (custo, caminho) in resultado.items():
+            ...     print(f"De A para {vertice.id}: custo={custo}, caminho={[v.id for v in caminho]}")
+        """
+        # Verificar se o vértice de origem existe no grafo
+        if origem not in self.grafo.vertices:
+            raise ValueError(f"O vértice de origem {origem.id} não existe no grafo.")
+
+        # Inicialização
+        distancias = {vertice: float("infinity") for vertice in self.grafo.vertices}
+        distancias[origem] = 0
+
+        # Dicionário para armazenar o caminho mais curto para cada vértice
+        caminhos = {vertice: [] for vertice in self.grafo.vertices}
+        caminhos[origem] = [origem]
+
+        # Conjunto de vértices não visitados
+        vertices_nao_visitados = set(self.grafo.vertices.vertices)
+
+        while vertices_nao_visitados:
+            # Encontrar o vértice não visitado com a menor distância atual
+            vertice_atual = min(vertices_nao_visitados, key=lambda v: distancias[v])
+
+            # Se a distância é infinita, os vértices restantes são inacessíveis
+            if distancias[vertice_atual] == float("infinity"):
+                break
+
+            # Remover o vértice atual do conjunto de não visitados
+            vertices_nao_visitados.remove(vertice_atual)
+
+            # Verificar todos os vizinhos do vértice atual
+            for vizinho in self.grafo.vertices:
+                # Verificar se há um arco entre o vértice atual e o vizinho
+                if (vertice_atual, vizinho) in self.grafo.arcos.arcos:
+                    arco = self.grafo.arcos.arcos[(vertice_atual, vizinho)]
+
+                    # Calcular a nova distância
+                    distancia_tentativa = distancias[vertice_atual] + arco.peso
+
+                    # Se encontrarmos um caminho mais curto, atualizamos
+                    if distancia_tentativa < distancias[vizinho]:
+                        distancias[vizinho] = distancia_tentativa
+                        # Construir o novo caminho
+                        caminhos[vizinho] = caminhos[vertice_atual] + [vizinho]
+
+        # Construir o resultado final
+        resultado = {}
+        for vertice in self.grafo.vertices:
+            resultado[vertice] = (distancias[vertice], caminhos[vertice])
+
+        return resultado
+
+    def encontrar_caminho_minimo(
+        self, origem: Vertice, destino: Vertice, /
+    ) -> tuple[float, list[Vertice]]:
+        """
+        Encontra o caminho mais curto entre dois vértices usando o algoritmo de Dijkstra.
+
+        Args:
+            origem (Vertice): O vértice de origem (parâmetro posicional).
+            destino (Vertice): O vértice de destino (parâmetro posicional).
+
+        Returns:
+            tuple[float, list[Vertice]]: Uma tupla contendo o custo do caminho mínimo
+            e a lista de vértices que compõem o caminho.
+
+        Exemplo:
+            >>> calculadora = CalculadoraDeGrafo(grafo)
+            >>> origem = Vertice("A")
+            >>> destino = Vertice("E")
+            >>> custo, caminho = calculadora.encontrar_caminho_minimo(origem, destino)
+            >>> print(f"Custo mínimo: {custo}")
+            >>> print(f"Caminho: {[v.id for v in caminho]}")
+        """
+        # Verificar se os vértices existem no grafo
+        if origem not in self.grafo.vertices:
+            raise ValueError(f"O vértice de origem {origem.id} não existe no grafo.")
+        if destino not in self.grafo.vertices:
+            raise ValueError(f"O vértice de destino {destino.id} não existe no grafo.")
+
+        # Calcular caminhos mínimos a partir da origem
+        resultados = self.calcular_caminho_minimo_dijkstra(origem)
+
+        # Verificar se o destino é alcançável
+        if resultados[destino][0] == float("infinity"):
+            return float("infinity"), []
+
+        return resultados[destino]
+
+    def visualizar_caminho_minimo(self, origem: Vertice, destino: Vertice, /) -> None:
+        """
+        Visualiza o caminho mais curto entre dois vértices usando o algoritmo de Dijkstra.
+
+        Args:
+            origem (Vertice): O vértice de origem (parâmetro posicional).
+            destino (Vertice): O vértice de destino (parâmetro posicional).
+
+        Returns:
+            None: Imprime o resultado na saída padrão.
+
+        Exemplo:
+            >>> calculadora = CalculadoraDeGrafo(grafo)
+            >>> origem = Vertice("A")
+            >>> destino = Vertice("E")
+            >>> calculadora.visualizar_caminho_minimo(origem, destino)
+            === Caminho mínimo de A para E ===
+            Custo total: 25.0
+            Caminho: A -> C -> D -> E
+        """
+        try:
+            custo, caminho = self.encontrar_caminho_minimo(origem, destino)
+
+            print(f"\n=== Caminho mínimo de {origem.id} para {destino.id} ===")
+
+            if custo == float("infinity"):
+                print(f"Não existe caminho de {origem.id} para {destino.id}")
+                return
+
+            print(f"Custo total: {custo}")
+
+            # Formatar o caminho para exibição
+            caminho_formatado = " -> ".join([v.id for v in caminho])
+            print(f"Caminho: {caminho_formatado}")
+
+            # Exibir detalhes dos arcos no caminho
+            print("\nDetalhes do caminho:")
+            for i in range(len(caminho) - 1):
+                v1 = caminho[i]
+                v2 = caminho[i + 1]
+                arco = self.grafo.arcos.arcos.get((v1, v2))
+                if arco:
+                    print(f"  {v1.id} -> {v2.id}: peso = {arco.peso}")
+
+        except ValueError as e:
+            print(f"Erro: {e}")
+
     def calcular_possibilidades_caminhos(
         self, v1: Vertice, v2: Vertice, /
     ) -> Sequence[Sequence[Arco]]:
@@ -630,10 +784,32 @@ def main() -> None:
     )
 
     calculadora = CalculadoraDeGrafo(grafo)
-    # Calcular possibilidades de caminhos
-    caminhos = calculadora.calcular_possibilidades_caminhos(va, vb)
+
+    # Exibir a matriz de adjacência
     mostrar_matriz_adjacencia(grafo, True)
-    print(f"\nCaminhos possíveis de A para E: {len(caminhos)}")
+
+    # Calcular e mostrar os caminhos mínimos usando Dijkstra
+    print("\n=== Demonstração do Algoritmo de Dijkstra ===")
+
+    # Encontrar caminhos mínimos a partir do vértice A
+    resultados = calculadora.calcular_caminho_minimo_dijkstra(va)
+
+    # Mostrar os caminhos mínimos para todos os vértices
+    print("Caminhos mínimos a partir do vértice A:")
+    for vertice, (custo, caminho) in resultados.items():
+        caminho_str = (
+            " -> ".join([v.id for v in caminho]) if caminho else "Não alcançável"
+        )
+        custo_str = f"{custo}" if custo != float("infinity") else "Infinito"
+        print(f"  Para {vertice.id}: custo = {custo_str}, caminho = {caminho_str}")
+
+    # Visualizar um caminho específico
+    print("\nCaminho mínimo de A para E:")
+    calculadora.visualizar_caminho_minimo(va, ve)
+
+    # Teste com outros vértices
+    print("\nCaminho mínimo de A para H:")
+    calculadora.visualizar_caminho_minimo(va, vh)
 
 
 # endregion
