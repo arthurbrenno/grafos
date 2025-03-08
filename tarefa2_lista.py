@@ -133,6 +133,7 @@ class Grafo:
         # Inicializar valores padrão
         if caminho_atual is None:
             caminho_atual = []
+
         if visitados is None:
             visitados = set()
 
