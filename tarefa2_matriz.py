@@ -24,11 +24,13 @@ class Grafo:
         if vertice in self.grafo.keys():
             return
 
-        # Pra cada elemento do dicionario, adicionar esse extra
-        for _, val in self.grafo.items():
-            val[vertice] = {}
+        # Atualizar os outros. Adicionar o novo vertice sendo criado e colocar None
+        for _, v in self.grafo.items():
+            v.update({vertice: None})
 
-        self.grafo[vertice] = {}
+        # Atualizar a atual
+        self.grafo[vertice] = {vertice: None}
+        self.grafo[vertice].update({k: None for k in self.grafo.keys()})
 
     def add_aresta(self, origem: str, destino: str, peso: float) -> None:
         """
@@ -62,16 +64,38 @@ class Grafo:
 
     def visualizar(self) -> None:
         """
-        Exibe uma representação visual do grafo no terminal.
+        Exibe uma representação visual do grafo como matriz de adjacência no terminal.
         Limpa a tela antes de exibir o grafo.
         """
         import os
 
         os.system("cls" if os.name == "nt" else "clear")
-        for origem, destinos in self.grafo.items():
-            print(f"{origem}: ", end=" ")
-            for _destino, _peso in destinos:
-                print(f"{_destino}({_peso}),", end="   ")
+
+        vertices = list(self.grafo.keys())
+
+        # Imprime o cabeçalho com os nomes dos vértices
+        print("    ", end="")
+        for v in vertices:
+            print(f"{v:^5}", end="")
+        print()
+
+        # Imprime a linha separadora
+        print("    " + "-----" * len(vertices))
+
+        # Imprime cada linha da matriz
+        for origem in vertices:
+            print(f"{origem} | ", end="")
+            for destino in vertices:
+                # Verifica se existe uma aresta entre origem e destino
+                if (
+                    destino in self.grafo[origem]
+                    and self.grafo[origem][destino] is not None
+                ):
+                    # Imprime o peso da aresta
+                    print(f"{self.grafo[origem][destino]:^5}", end="")
+                else:
+                    # Imprime um indicador de que não há aresta
+                    print("  -  ", end="")
             print()
 
     def calcular_caminhos_possiveis(
@@ -118,7 +142,13 @@ class Grafo:
             print(f"Peso total: {peso_total}")
 
 
-def main() -> None: ...
+def main() -> None:
+    g = Grafo()
+    g.add_vertice("a")
+    g.add_vertice("b")
+    g.add_vertice("c")
+
+    g.visualizar()
 
 
 if __name__ == "__main__":
