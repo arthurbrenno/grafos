@@ -113,7 +113,7 @@ class Grafo:
         self,
         origem: str,
         destino: str,
-        caminho_atual: list[tuple[str, float]] | None = None,
+        caminho_atual: list[DestinoEPeso] | None = None,
         visitados: set[str] | None = None,
     ) -> list[list[DestinoEPeso]]:
         """
@@ -122,7 +122,7 @@ class Grafo:
         Args:
             origem (str): Vértice de origem.
             destino (str): Vértice de destino.
-            caminho_atual (list[tuple[str, float]] | None, opcional): Lista de vértices e pesos 
+            caminho_atual (list[DestinoEPeso] | None, opcional): Lista de vértices e pesos 
                                                                       no caminho atual. Padrão é None.
             visitados (set[str] | None, opcional): Conjunto de vértices já visitados. Padrão é None.
             
