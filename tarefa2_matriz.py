@@ -44,9 +44,15 @@ class Grafo:
         Raises:
             RuntimeError: Se qualquer um dos vértices não existir no grafo.
         """
-        ...
+        if origem not in self.grafo.keys():
+            raise RuntimeError("O vértice de origem não foi encontrado no grafo.")
 
-    def obter_peso_vertices_adjacentes(self, origem: str, destino: str) -> float:
+        if destino not in self.grafo.keys():
+            raise RuntimeError("O vértice de destino não foi encontrado no grafo.")
+
+        self.grafo[origem][destino] = peso
+
+    def obter_peso_vertices_adjacentes(self, origem: str, destino: str) -> float | None:
         """
         Obtém o peso da aresta entre dois vértices adjacentes.
 
@@ -60,7 +66,13 @@ class Grafo:
         Raises:
             RuntimeError: Se a origem não existir ou os vértices não forem adjacentes.
         """
-        ...
+        if origem not in self.grafo.keys():
+            raise RuntimeError("A origem não foi cadastrada.")
+
+        if destino not in self.grafo[origem] or self.grafo[origem][destino] is None:
+            raise RuntimeError("Os vértices não são adjacentes.")
+
+        return self.grafo[origem][destino]
 
     def visualizar(self) -> None:
         """
@@ -102,6 +114,8 @@ class Grafo:
         self,
         origem: str,
         destino: str,
+        caminho_atual: list[DestinoEPeso] | None = None,
+        visitados: set[str] | None = None,
     ) -> list[list[DestinoEPeso]]:
         """
         Calcula todos os caminhos possíveis entre dois vértices usando busca em profundidade.
@@ -109,15 +123,54 @@ class Grafo:
         Args:
             origem (str): Vértice de origem.
             destino (str): Vértice de destino.
-            caminho_atual (list[DestinoEPeso] | None, opcional): Lista de vértices e pesos
-                                                                      no caminho atual. Padrão é None.
-            visitados (set[str] | None, opcional): Conjunto de vértices já visitados. Padrão é None.
+            caminho_atual (list[DestinoEPeso] | None): Lista de vértices e pesos
+                                                     no caminho atual. Padrão é None.
+            visitados (set[str] | None): Conjunto de vértices já visitados. Padrão é None.
 
         Returns:
             list[list[DestinoEPeso]]: Lista de todos os caminhos possíveis entre origem e destino.
                                      Cada caminho é uma lista de tuplas (vértice, peso).
         """
-        ...
+        # Inicializar valores padrão
+        if caminho_atual is None:
+            caminho_atual = []
+        if visitados is None:
+            visitados = set()
+
+        # Registrar o vértice atual como visitado
+        visitados.add(origem)
+
+        # Se chegamos ao destino, retornamos o caminho atual como um único caminho em uma lista
+        if origem == destino:
+            return [caminho_atual]
+
+        # Lista para armazenar todos os caminhos encontrados
+        caminhos: list[list[DestinoEPeso]] = []
+
+        # Explorar todos os vértices adjacentes
+        for proximo_destino in self.grafo[origem]:
+            peso = self.grafo[origem][proximo_destino]
+            # Ignorar vértices sem conexão (peso None)
+            if peso is None:
+                continue
+
+            # Verificar se o vértice já foi visitado para evitar ciclos
+            if proximo_destino not in visitados:
+                # Adicionar o próximo destino ao caminho atual
+                novo_caminho = caminho_atual + [(proximo_destino, peso)]
+
+                # Criar uma cópia do conjunto de visitados para a recursão
+                novo_visitados = visitados.copy()
+
+                # Chamada recursiva para continuar a partir do próximo destino
+                caminhos_encontrados = self.calcular_caminhos_possiveis(
+                    proximo_destino, destino, novo_caminho, novo_visitados
+                )
+
+                # Adicionar os caminhos encontrados à lista de caminhos
+                caminhos.extend(caminhos_encontrados)
+
+        return caminhos
 
     def mostrar_caminhos_possiveis(self, caminhos: list[list[DestinoEPeso]]) -> None:
         """
@@ -131,22 +184,138 @@ class Grafo:
 
         os.system("cls" if os.name == "nt" else "clear")
 
+        if not caminhos:
+            print("Não foram encontrados caminhos entre os vértices especificados.")
+            return
+
+        print(f"\nCaminhos possíveis encontrados: {len(caminhos)}")
+
         for i, caminho in enumerate(caminhos, 1):
             print(f"Caminho {i}:", end=" ")
+
+            # Verificar se o caminho está vazio (origem = destino)
+            if not caminho:
+                print("Origem e destino são o mesmo vértice.")
+                continue
+
+            # Obter o primeiro vértice do caminho
             peso_total = 0
+
+            # Imprimir o vértice de origem (que não está no caminho)
+            if len(caminho) > 0:
+                # Encontramos o vértice de origem por exclusão
+                for v in self.grafo.keys():
+                    if v not in [dest for dest, _ in caminho]:
+                        print(f"{v} →", end=" ")
+                        break
+
+            # Imprimir o resto do caminho
             for destino, peso in caminho:
                 print(f"{destino} ({peso}) →", end=" ")
                 peso_total += peso
+
             print(f"Peso total: {peso_total}")
 
 
-def main() -> None:
-    g = Grafo()
-    g.add_vertice("a")
-    g.add_vertice("b")
-    g.add_vertice("c")
+def ler_grafo_de_arquivo(nome_arquivo: str) -> Grafo:
+    """
+    Lê um grafo de um arquivo de texto em formato estruturado.
 
-    g.visualizar()
+    Formato do arquivo:
+    # Linhas que começam com # são comentários
+    VERTICES:
+    v1
+    v2
+    ...
+    ARESTAS:
+    v1 v2 peso
+    v2 v3 peso
+    ...
+
+    Args:
+        nome_arquivo (str): Caminho para o arquivo de texto.
+
+    Returns:
+        Grafo: Um novo grafo configurado com os vértices e arestas do arquivo.
+
+    Raises:
+        FileNotFoundError: Se o arquivo não for encontrado.
+        ValueError: Se o formato do arquivo for inválido.
+    """
+    g = Grafo()
+
+    with open(nome_arquivo, "r") as arquivo:
+        linhas = arquivo.readlines()
+
+    # Estado para controlar o que estamos lendo
+    estado = None
+
+    for numero_linha, linha in enumerate(linhas, 1):
+        linha = linha.strip()
+
+        # Ignorar linhas em branco ou comentários
+        if not linha or linha.startswith("#"):
+            continue
+
+        # Verificar seções
+        if linha == "VERTICES:":
+            estado = "vertices"
+            continue
+        elif linha == "ARESTAS:":
+            estado = "arestas"
+            continue
+
+        # Processar conteúdo baseado no estado atual
+        if estado == "vertices":
+            g.add_vertice(linha)
+        elif estado == "arestas":
+            partes = linha.split()
+            if len(partes) != 3:
+                raise ValueError(
+                    f"Formato inválido na linha {numero_linha}: '{linha}'. Use 'origem destino peso'"
+                )
+
+            origem, destino, peso_str = partes
+            try:
+                peso = float(peso_str)
+                g.add_aresta(origem=origem, destino=destino, peso=peso)
+            except ValueError:
+                raise ValueError(f"Peso inválido na linha {numero_linha}: '{peso_str}'")
+            except RuntimeError as e:
+                raise ValueError(
+                    f"Erro ao adicionar aresta na linha {numero_linha}: {e}"
+                )
+
+    # Verificar se o grafo tem pelo menos um vértice
+    if not g.grafo:
+        raise ValueError("Arquivo não contém vértices válidos")
+
+    return g
+
+
+def main() -> None:
+    """
+    Função principal que lê um grafo de um arquivo, calcula e mostra caminhos entre vértices.
+    """
+    try:
+        g = ler_grafo_de_arquivo("input.txt")
+
+        print("Grafo carregado com sucesso!")
+        g.visualizar()
+
+        origem = input("\nDigite o vértice de origem: ").upper()
+        destino = input("Digite o vértice de destino: ").upper()
+
+        caminhos = g.calcular_caminhos_possiveis(origem=origem, destino=destino)
+
+        if not caminhos:
+            print(f"Não foram encontrados caminhos de {origem} para {destino}.")
+        else:
+            g.mostrar_caminhos_possiveis(caminhos)
+    except ValueError as e:
+        print(f"Erro no formato do arquivo: {e}")
+    except Exception as e:
+        print(f"Erro: {e}")
 
 
 if __name__ == "__main__":

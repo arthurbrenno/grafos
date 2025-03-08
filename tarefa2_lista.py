@@ -178,7 +178,8 @@ class Grafo:
                                                 Cada caminho é uma lista de tuplas (vértice, peso).
         """
         import os
-        os.system('cls' if os.name == 'nt' else 'clear')
+
+        os.system("cls" if os.name == "nt" else "clear")
 
         for i, caminho in enumerate(caminhos, 1):
             print(f"Caminho {i}:", end=" ")
@@ -266,11 +267,28 @@ def ler_grafo_de_arquivo(nome_arquivo: str) -> Grafo:
 
 
 def main() -> None:
-    g = ler_grafo_de_arquivo("input.txt")
+    """
+    Função principal que lê um grafo de um arquivo, calcula e mostra caminhos entre vértices.
+    """
+    try:
+        g = ler_grafo_de_arquivo("input.txt")
 
-    # Teste da função de calcular caminhos
-    caminhos = g.calcular_caminhos_possiveis(origem="a", destino="c")
-    g.mostrar_caminhos_possiveis(caminhos)
+        print("Grafo carregado com sucesso!")
+        g.visualizar()
+
+        origem = input("\nDigite o vértice de origem: ").upper()
+        destino = input("Digite o vértice de destino: ").upper()
+
+        caminhos = g.calcular_caminhos_possiveis(origem=origem, destino=destino)
+
+        if not caminhos:
+            print(f"Não foram encontrados caminhos de {origem} para {destino}.")
+        else:
+            g.mostrar_caminhos_possiveis(caminhos)
+    except ValueError as e:
+        print(f"Erro no formato do arquivo: {e}")
+    except Exception as e:
+        print(f"Erro: {e}")
 
 
 if __name__ == "__main__":
