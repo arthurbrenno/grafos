@@ -53,11 +53,11 @@ class Grafo:
         if vertice in self.grafo.keys():
             return
 
-        # Atualizar os outros. Adicionar o novo vertice sendo criado e colocar None
+        # Atualizar os outros vertices. Adicionar o novo vertice sendo criado e colocar None
         for _, v in self.grafo.items():
             v.update({vertice: None})
 
-        # Atualizar a atual
+        # Criar o vertice atual e colocar os vertices anteriores nas chaves dele
         self.grafo[vertice] = {vertice: None}
         self.grafo[vertice].update({k: None for k in self.grafo.keys()})
 
