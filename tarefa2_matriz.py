@@ -102,8 +102,6 @@ class Grafo:
         self,
         origem: str,
         destino: str,
-        caminho_atual: list[DestinoEPeso] | None = None,
-        visitados: set[str] | None = None,
     ) -> list[list[DestinoEPeso]]:
         """
         Calcula todos os caminhos possíveis entre dois vértices usando busca em profundidade.
