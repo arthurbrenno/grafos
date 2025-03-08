@@ -12,6 +12,7 @@ Tipos:
 
 type DestinoEPeso = tuple[str, float]
 type CaminhoPossivel = list[DestinoEPeso]
+type RepresentacaoGrafo = dict[str, dict[str, float | None]]
 
 
 class Grafo:
@@ -24,12 +25,12 @@ class Grafo:
     - O valor representa o peso da aresta (ou None se não existir conexão)
 
     Atributos:
-        grafo (dict[str, dict[str, float | None]]): Matriz de adjacência do grafo.
+        grafo (RepresentacaoGrafo): Matriz de adjacência do grafo.
     """
 
-    grafo: dict[str, dict[str, float | None]]
+    grafo: RepresentacaoGrafo
 
-    def __init__(self, grafo: dict[str, dict[str, float | None]] | None = None) -> None:
+    def __init__(self, grafo: RepresentacaoGrafo | None = None) -> None:
         """
         Inicializa um novo grafo, opcionalmente a partir de um dicionário existente.
 
