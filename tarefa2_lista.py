@@ -269,9 +269,38 @@ def ler_grafo_de_arquivo(nome_arquivo: str) -> Grafo:
 def main() -> None:
     """
     Função principal que lê um grafo de um arquivo, calcula e mostra caminhos entre vértices.
+
+    Se o arquivo 'input.txt' não existir, cria automaticamente um arquivo de exemplo.
     """
     try:
-        g = ler_grafo_de_arquivo("input.txt")
+        nome_arquivo = "input.txt"
+
+        try:
+            g = ler_grafo_de_arquivo(nome_arquivo)
+        except FileNotFoundError:
+            print(
+                f"Arquivo '{nome_arquivo}' não encontrado. Criando arquivo de exemplo..."
+            )
+            with open(nome_arquivo, "w") as f:
+                f.write("""# Grafo de exemplo
+VERTICES:
+A
+B
+C
+D
+E
+
+ARESTAS:
+A B 5.2
+A C 3.1
+B D 2.0
+C D 1.7
+B E 4.3
+D E 2.5""")
+
+            # Tenta ler o arquivo recém-criado
+            g = ler_grafo_de_arquivo(nome_arquivo)
+            print(f"Arquivo de exemplo '{nome_arquivo}' criado com sucesso!")
 
         print("Grafo carregado com sucesso!")
         g.visualizar()
@@ -285,10 +314,11 @@ def main() -> None:
             print(f"Não foram encontrados caminhos de {origem} para {destino}.")
         else:
             g.mostrar_caminhos_possiveis(caminhos)
+
     except ValueError as e:
         print(f"Erro no formato do arquivo: {e}")
     except Exception as e:
-        print(f"Erro: {e}")
+        print(f"Erro inesperado: {e}")
 
 
 if __name__ == "__main__":
