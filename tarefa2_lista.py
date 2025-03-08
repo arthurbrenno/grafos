@@ -177,7 +177,8 @@ class Grafo:
             caminhos (list[list[DestinoEPeso]]): Lista de caminhos a serem exibidos.
                                                 Cada caminho é uma lista de tuplas (vértice, peso).
         """
-        print("\nCaminhos possíveis de A para D:")
+        import os
+        os.system('cls' if os.name == 'nt' else 'clear')
 
         for i, caminho in enumerate(caminhos, 1):
             print(f"Caminho {i}:", end=" ")
@@ -265,22 +266,7 @@ def ler_grafo_de_arquivo(nome_arquivo: str) -> Grafo:
 
 
 def main() -> None:
-    """
-    Função principal que demonstra o uso da classe Grafo.
-    Cria um grafo de exemplo com 4 vértices e 3 arestas, e calcula os caminhos
-    possíveis de 'A' para 'C'.
-    """
-    g = Grafo()
-    g.add_vertice("a")
-    g.add_vertice("b")
-    g.add_vertice("c")
-    g.add_vertice("d")
-
-    g.add_aresta(origem="a", destino="b", peso=1)
-    g.add_aresta(origem="b", destino="c", peso=1)
-    g.add_aresta(origem="a", destino="c", peso=1)
-
-    g.visualizar()
+    g = ler_grafo_de_arquivo("input.txt")
 
     # Teste da função de calcular caminhos
     caminhos = g.calcular_caminhos_possiveis(origem="a", destino="c")
