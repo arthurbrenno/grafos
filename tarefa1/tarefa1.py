@@ -68,20 +68,6 @@ logger.addHandler(console_handler)
 # endregion
 
 # region imports condicionais
-# Tenta importar pyvis para visualização do grafo
-if pyvis := importlib.util.find_spec("pyvis"):
-    PYVIS_AVAILABLE = True
-else:
-    logger.debug("AVISO: pyvis não encontrado. Visualização do grafo não disponível.")
-    PYVIS_AVAILABLE = False
-
-# Tenta importar rich para pretty printing
-if rich := importlib.util.find_spec("rich"):
-    RICH_AVAILABLE = True
-else:
-    logger.debug("AVISO: rich não encontrado. Pretty printing não disponível.")
-    RICH_AVAILABLE = False
-# endregion
 
 type DirecaoArco = Literal["bidirecional", "origem", "destino", "sem_direcao"]
 type PesoArco = float
@@ -179,34 +165,6 @@ def mostrar_matriz_adjacencia(grafo: Grafo, clear_screen: bool = False) -> None:
     if n == 0:
         print("\n=== Matriz de Adjacência ===")
         print("Grafo vazio")
-        return
-
-    # Se o rich estiver disponível, usar para exibição mais bonita
-    if RICH_AVAILABLE:
-        loader = rich.loader()
-        if loader is None:
-            raise RuntimeError("Loader not found.")
-
-        console = rich.Console()
-        table = rich.Table(
-            title="Matriz de Adjacência", show_header=True, header_style="bold"
-        )
-
-        # Adicionar cabeçalhos
-        table.add_column("")
-        for v in vertices_ordenados:
-            table.add_column(v.id, justify="center")
-
-        # Adicionar linhas
-        for v1 in vertices_ordenados:
-            row = [v1.id]
-            for v2 in vertices_ordenados:
-                arco = grafo.arcos.arcos.get((v1, v2))
-                valor = f"{arco.peso:.1f}" if arco else "null"
-                row.append(valor)
-            table.add_row(*row)
-
-        console.print(table)
         return
 
     # Exibição tradicional se rich não estiver disponível
@@ -676,6 +634,13 @@ def main() -> None:
         (va, vb, 10),
         (va, vc, 15),
         (vb, ve, 25),
+        (vc, ve, 10),
+        (vc, vd, 5),
+        (vd, ve, 15),
+        (ve, vf, 10),
+        (vf, vh, 30),
+        (vh, vg, 20),
+        (vg, ve, 100),
     )
 
     calculadora = CalculadoraDeGrafo(grafo)

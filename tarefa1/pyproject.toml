@@ -8,5 +8,4 @@ dependencies = [
     "pyqt5>=5.15.11",
     "pyqtwebengine>=5.15.7",
     "pyvis>=0.3.2",
-    "rich>=13.9.4",
 ]
