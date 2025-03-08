@@ -13,17 +13,17 @@ type DestinoEPeso = tuple[str, float]
 class Grafo:
     """
     Classe que implementa um grafo direcionado com pesos nas arestas.
-    
+
     Atributos:
         grafo (dict[str, set[DestinoEPeso]]): Dicionário que mapeia vértices para seus destinos e pesos.
     """
-    
+
     grafo: dict[str, set[DestinoEPeso]]
 
     def __init__(self, grafo: dict[str, set[DestinoEPeso]] | None = None) -> None:
         """
         Inicializa um novo grafo, opcionalmente a partir de um dicionário existente.
-        
+
         Args:
             grafo (dict[str, set[DestinoEPeso]] | None, opcional): Dicionário inicial para o grafo.
                                                                   Se None, cria um grafo vazio.
@@ -33,7 +33,7 @@ class Grafo:
     def add_vertice(self, vertice: str) -> None:
         """
         Adiciona um novo vértice ao grafo se ele ainda não existir.
-        
+
         Args:
             vertice (str): Nome do vértice a ser adicionado.
         """
@@ -46,12 +46,12 @@ class Grafo:
     def add_aresta(self, origem: str, destino: str, peso: float) -> None:
         """
         Adiciona uma aresta direcionada com peso entre dois vértices.
-        
+
         Args:
             origem (str): Vértice de origem da aresta.
             destino (str): Vértice de destino da aresta.
             peso (float): Peso associado à aresta.
-            
+
         Raises:
             RuntimeError: Se qualquer um dos vértices não existir no grafo.
         """
@@ -68,14 +68,14 @@ class Grafo:
     def obter_peso_vertices_adjacentes(self, origem: str, destino: str) -> float:
         """
         Obtém o peso da aresta entre dois vértices adjacentes.
-        
+
         Args:
             origem (str): Vértice de origem.
             destino (str): Vértice de destino.
-            
+
         Returns:
             float: Peso da aresta entre os vértices.
-            
+
         Raises:
             RuntimeError: Se a origem não existir ou os vértices não forem adjacentes.
         """
@@ -84,9 +84,9 @@ class Grafo:
 
         destinos = self.grafo[origem]
         peso: float | None = None
-        for _dest in destinos:
-            if destino == _dest[0]:
-                peso = _dest[1]
+        for _dest, _peso in destinos:
+            if destino == _dest:
+                peso = _peso
 
         if peso is None:
             raise RuntimeError("Os vertices não são adjacentes.")
@@ -103,9 +103,7 @@ class Grafo:
         os.system("cls" if os.name == "nt" else "clear")
         for origem, destinos in self.grafo.items():
             print(f"{origem}: ", end=" ")
-            for destino in destinos:
-                _destino = destino[0]
-                _peso = destino[1]
+            for _destino, _peso in destinos:
                 print(f"{_destino}({_peso}),", end="   ")
             print()
 
@@ -118,14 +116,14 @@ class Grafo:
     ) -> list[list[DestinoEPeso]]:
         """
         Calcula todos os caminhos possíveis entre dois vértices usando busca em profundidade.
-        
+
         Args:
             origem (str): Vértice de origem.
             destino (str): Vértice de destino.
-            caminho_atual (list[DestinoEPeso] | None, opcional): Lista de vértices e pesos 
+            caminho_atual (list[DestinoEPeso] | None, opcional): Lista de vértices e pesos
                                                                       no caminho atual. Padrão é None.
             visitados (set[str] | None, opcional): Conjunto de vértices já visitados. Padrão é None.
-            
+
         Returns:
             list[list[DestinoEPeso]]: Lista de todos os caminhos possíveis entre origem e destino.
                                      Cada caminho é uma lista de tuplas (vértice, peso).
@@ -174,7 +172,7 @@ class Grafo:
     def mostrar_caminhos_possiveis(self, caminhos: list[list[DestinoEPeso]]) -> None:
         """
         Exibe todos os caminhos possíveis entre dois vértices, com seus respectivos pesos.
-        
+
         Args:
             caminhos (list[list[DestinoEPeso]]): Lista de caminhos a serem exibidos.
                                                 Cada caminho é uma lista de tuplas (vértice, peso).
