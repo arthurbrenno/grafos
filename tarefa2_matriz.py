@@ -1,8 +1,32 @@
+"""
+Módulo para manipulação de grafos ponderados direcionados usando matriz de adjacência.
+
+Este módulo implementa uma estrutura de dados para representar grafos direcionados
+com pesos nas arestas, utilizando um dicionário de dicionários como matriz de adjacência.
+Também inclui funções para calcular e visualizar todos os caminhos possíveis entre dois vértices.
+
+Tipos:
+    DestinoEPeso: Tupla representando um vértice destino e o peso da aresta para chegar até ele.
+    CaminhoPossivel: Lista de tuplas DestinoEPeso representando um caminho completo no grafo.
+"""
+
 type DestinoEPeso = tuple[str, float]
 type CaminhoPossivel = list[DestinoEPeso]
 
 
 class Grafo:
+    """
+    Classe que representa um grafo direcionado e ponderado usando matriz de adjacência.
+
+    A matriz de adjacência é implementada como um dicionário de dicionários, onde:
+    - A chave externa representa o vértice de origem
+    - A chave interna representa o vértice de destino
+    - O valor representa o peso da aresta (ou None se não existir conexão)
+
+    Atributos:
+        grafo (dict[str, dict[str, float | None]]): Matriz de adjacência do grafo.
+    """
+
     grafo: dict[str, dict[str, float | None]]
 
     def __init__(self, grafo: dict[str, dict[str, float | None]] | None = None) -> None:
@@ -18,6 +42,9 @@ class Grafo:
     def add_vertice(self, vertice: str) -> None:
         """
         Adiciona um novo vértice ao grafo se ele ainda não existir.
+
+        Este método atualiza a matriz de adjacência adicionando uma nova linha e coluna
+        para o novo vértice, inicializando todas as conexões como None.
 
         Args:
             vertice (str): Nome do vértice a ser adicionado.
@@ -36,6 +63,9 @@ class Grafo:
     def add_aresta(self, origem: str, destino: str, peso: float) -> None:
         """
         Adiciona uma aresta direcionada com peso entre dois vértices.
+
+        O método cria uma conexão de origem para destino com o peso especificado.
+        Não cria automaticamente a conexão inversa (de destino para origem).
 
         Args:
             origem (str): Vértice de origem da aresta.
@@ -78,6 +108,12 @@ class Grafo:
     def visualizar(self) -> None:
         """
         Exibe uma representação visual do grafo como matriz de adjacência no terminal.
+
+        O método limpa a tela e exibe uma tabela onde:
+        - As linhas representam os vértices de origem
+        - As colunas representam os vértices de destino
+        - As células contêm o peso da aresta ou "-" se não houver conexão
+
         Limpa a tela antes de exibir o grafo.
         """
         import os
@@ -120,6 +156,9 @@ class Grafo:
     ) -> list[CaminhoPossivel]:
         """
         Calcula todos os caminhos possíveis entre dois vértices usando busca em profundidade.
+
+        O algoritmo utiliza uma abordagem recursiva de busca em profundidade (DFS) para
+        encontrar todos os caminhos possíveis sem ciclos entre os vértices de origem e destino.
 
         Args:
             origem (str): Vértice de origem.
@@ -178,9 +217,12 @@ class Grafo:
         """
         Exibe todos os caminhos possíveis entre dois vértices, com seus respectivos pesos.
 
+        Para cada caminho, exibe a sequência de vértices, o peso de cada aresta,
+        e o peso total do caminho.
+
         Args:
             caminhos (CaminhoPossivel): Lista de caminhos a serem exibidos.
-                                                Cada caminho é uma lista de tuplas (vértice, peso).
+                                       Cada caminho é uma lista de tuplas (vértice, peso).
         """
         import os
 
@@ -222,6 +264,9 @@ class Grafo:
 def ler_grafo_de_arquivo(nome_arquivo: str) -> Grafo:
     """
     Lê um grafo de um arquivo de texto em formato estruturado.
+
+    O arquivo deve seguir um formato específico com seções para vértices e arestas.
+    Comentários podem ser incluídos iniciando a linha com #.
 
     Formato do arquivo:
     # Linhas que começam com # são comentários
@@ -298,6 +343,13 @@ def ler_grafo_de_arquivo(nome_arquivo: str) -> Grafo:
 def main() -> None:
     """
     Função principal que lê um grafo de um arquivo, calcula e mostra caminhos entre vértices.
+
+    Fluxo de execução:
+    1. Tenta carregar um grafo do arquivo 'input.txt'
+    2. Exibe a representação visual do grafo
+    3. Solicita ao usuário os vértices de origem e destino
+    4. Calcula e exibe todos os caminhos possíveis entre os vértices especificados
+    5. Trata possíveis erros durante a execução
     """
     try:
         g = ler_grafo_de_arquivo("input.txt")
