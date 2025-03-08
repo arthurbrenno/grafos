@@ -188,6 +188,82 @@ class Grafo:
             print(f"Peso total: {peso_total}")
 
 
+def ler_grafo_de_arquivo(nome_arquivo: str) -> Grafo:
+    """
+    Lê um grafo de um arquivo de texto em formato estruturado.
+
+    Formato do arquivo:
+    # Linhas que começam com # são comentários
+    VERTICES:
+    v1
+    v2
+    ...
+    ARESTAS:
+    v1 v2 peso
+    v2 v3 peso
+    ...
+
+    Args:
+        nome_arquivo (str): Caminho para o arquivo de texto.
+
+    Returns:
+        Grafo: Um novo grafo configurado com os vértices e arestas do arquivo.
+
+    Raises:
+        FileNotFoundError: Se o arquivo não for encontrado.
+        ValueError: Se o formato do arquivo for inválido.
+    """
+    g = Grafo()
+
+    with open(nome_arquivo, "r") as arquivo:
+        linhas = arquivo.readlines()
+
+    # Estado para controlar o que estamos lendo
+    estado = None
+
+    for numero_linha, linha in enumerate(linhas, 1):
+        linha = linha.strip()
+
+        # Ignorar linhas em branco ou comentários
+        if not linha or linha.startswith("#"):
+            continue
+
+        # Verificar seções
+        if linha == "VERTICES:":
+            estado = "vertices"
+            continue
+        elif linha == "ARESTAS:":
+            estado = "arestas"
+            continue
+
+        # Processar conteúdo baseado no estado atual
+        if estado == "vertices":
+            g.add_vertice(linha)
+        elif estado == "arestas":
+            partes = linha.split()
+            if len(partes) != 3:
+                raise ValueError(
+                    f"Formato inválido na linha {numero_linha}: '{linha}'. Use 'origem destino peso'"
+                )
+
+            origem, destino, peso_str = partes
+            try:
+                peso = float(peso_str)
+                g.add_aresta(origem=origem, destino=destino, peso=peso)
+            except ValueError:
+                raise ValueError(f"Peso inválido na linha {numero_linha}: '{peso_str}'")
+            except RuntimeError as e:
+                raise ValueError(
+                    f"Erro ao adicionar aresta na linha {numero_linha}: {e}"
+                )
+
+    # Verificar se o grafo tem pelo menos um vértice
+    if not g.grafo:
+        raise ValueError("Arquivo não contém vértices válidos")
+
+    return g
+
+
 def main() -> None:
     """
     Função principal que demonstra o uso da classe Grafo.
