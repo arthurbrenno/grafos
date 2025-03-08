@@ -367,6 +367,25 @@ def main() -> None:
             print(f"Não foram encontrados caminhos de {origem} para {destino}.")
         else:
             g.mostrar_caminhos_possiveis(caminhos)
+    except FileNotFoundError:
+        with open("input.txt", "w") as f:
+            f.write("""
+                    VERTICES:
+                    A
+                    B
+                    C
+                    D
+                    E
+
+                    ARESTAS:
+                    A B 5.2
+                    A C 3.1
+                    B D 2.0
+                    C D 1.7
+                    B E 4.3
+                    D E 2.5
+                    """)
+            main()
     except ValueError as e:
         print(f"Erro no formato do arquivo: {e}")
     except Exception as e:
