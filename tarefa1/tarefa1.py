@@ -47,8 +47,6 @@ Para mais detalhes sobre cada classe e seus métodos, consulte as docstrings ind
 
 from __future__ import annotations
 
-import importlib
-import importlib.util
 import logging
 import logging.config
 import os
