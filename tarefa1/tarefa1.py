@@ -47,23 +47,11 @@ Para mais detalhes sobre cada classe e seus métodos, consulte as docstrings ind
 
 from __future__ import annotations
 
-import logging
-import logging.config
 import os
 import timeit
 from collections.abc import Iterator, MutableSequence, MutableSet, Sequence, ValuesView
 from dataclasses import dataclass, field
 from typing import Literal
-
-# region logger
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-logger.propagate = False
-console_handler = logging.StreamHandler()
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-console_handler.setFormatter(formatter)
-logger.addHandler(console_handler)
-# endregion
 
 # region imports condicionais
 
@@ -656,5 +644,4 @@ if __name__ == "__main__":
 
     beginning = timeit.default_timer()
     main()
-    logger.debug(f"Execução finalizada em {(timeit.default_timer() - beginning):.3f}s")
 # endregion
