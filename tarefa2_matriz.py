@@ -1,4 +1,5 @@
 type DestinoEPeso = tuple[str, float]
+type CaminhosPossiveis = list[DestinoEPeso]
 
 
 class Grafo:
@@ -116,7 +117,7 @@ class Grafo:
         destino: str,
         caminho_atual: list[DestinoEPeso] | None = None,
         visitados: set[str] | None = None,
-    ) -> list[list[DestinoEPeso]]:
+    ) -> list[CaminhosPossiveis]:
         """
         Calcula todos os caminhos possíveis entre dois vértices usando busca em profundidade.
 
@@ -128,12 +129,13 @@ class Grafo:
             visitados (set[str] | None): Conjunto de vértices já visitados. Padrão é None.
 
         Returns:
-            list[list[DestinoEPeso]]: Lista de todos os caminhos possíveis entre origem e destino.
+            list[CaminhosPossiveis]: Lista de todos os caminhos possíveis entre origem e destino.
                                      Cada caminho é uma lista de tuplas (vértice, peso).
         """
         # Inicializar valores padrão
         if caminho_atual is None:
             caminho_atual = []
+
         if visitados is None:
             visitados = set()
 
@@ -145,7 +147,7 @@ class Grafo:
             return [caminho_atual]
 
         # Lista para armazenar todos os caminhos encontrados
-        caminhos: list[list[DestinoEPeso]] = []
+        caminhos: list[CaminhosPossiveis] = []
 
         # Explorar todos os vértices adjacentes
         for proximo_destino in self.grafo[origem]:
@@ -172,12 +174,12 @@ class Grafo:
 
         return caminhos
 
-    def mostrar_caminhos_possiveis(self, caminhos: list[list[DestinoEPeso]]) -> None:
+    def mostrar_caminhos_possiveis(self, caminhos: list[CaminhosPossiveis]) -> None:
         """
         Exibe todos os caminhos possíveis entre dois vértices, com seus respectivos pesos.
 
         Args:
-            caminhos (list[list[DestinoEPeso]]): Lista de caminhos a serem exibidos.
+            caminhos (CaminhosPossiveis): Lista de caminhos a serem exibidos.
                                                 Cada caminho é uma lista de tuplas (vértice, peso).
         """
         import os
