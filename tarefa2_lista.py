@@ -154,14 +154,11 @@ class Grafo:
             if proximo_destino in visitados:
                 continue
 
-            # Adicionar o próximo destino ao caminho atual
-            novo_caminho = caminho_atual + [(proximo_destino, peso)]
-
             # Chamada recursiva para continuar a partir do próximo destino
             caminhos_encontrados = self.calcular_caminhos_possiveis(
                 origem=proximo_destino,
                 destino=destino,
-                caminho_atual=novo_caminho,
+                caminho_atual=caminho_atual + [(proximo_destino, peso)],
                 visitados=visitados.copy(),
             )
 
