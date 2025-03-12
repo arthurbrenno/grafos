@@ -131,7 +131,6 @@ class Grafo:
         """
         # Inicializar valores padrão
         caminho_atual = caminho_atual or []
-
         visitados = visitados or set()
 
         # Converter para maiúsculo para manter o padrão
