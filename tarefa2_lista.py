@@ -151,21 +151,25 @@ class Grafo:
         # Explorar todos os vértices adjacentes
         for proximo_destino, peso in self.grafo[origem]:
             # Verificar se o vértice já foi visitado para evitar ciclos
-            if proximo_destino not in visitados:
-                # Adicionar o próximo destino ao caminho atual
-                novo_caminho = caminho_atual + [(proximo_destino, peso)]
+            if proximo_destino in visitados:
+                continue
 
-                # Criar uma cópia do conjunto de visitados para a recursão
-                # Se a mesma lista eh passada, os valores seriam alterados na proxima chamada.
-                novo_visitados = visitados.copy()
+            # Adicionar o próximo destino ao caminho atual
+            novo_caminho = caminho_atual + [(proximo_destino, peso)]
 
-                # Chamada recursiva para continuar a partir do próximo destino
-                caminhos_encontrados = self.calcular_caminhos_possiveis(
-                    proximo_destino, destino, novo_caminho, novo_visitados
-                )
+            # Criar uma cópia do conjunto de visitados para a recursão
+            # Se a mesma lista eh passada, os valores seriam alterados na proxima chamada.
 
-                # Adicionar os caminhos encontrados à lista de caminhos
-                caminhos.extend(caminhos_encontrados)
+            # Chamada recursiva para continuar a partir do próximo destino
+            caminhos_encontrados = self.calcular_caminhos_possiveis(
+                origem=proximo_destino,
+                destino=destino,
+                caminho_atual=novo_caminho,
+                visitados=visitados.copy(),
+            )
+
+            # Adicionar os caminhos encontrados à lista de caminhos
+            caminhos.extend(caminhos_encontrados)
 
         return caminhos
 
