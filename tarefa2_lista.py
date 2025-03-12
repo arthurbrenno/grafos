@@ -116,6 +116,7 @@ class Grafo:
     ) -> list[list[DestinoEPeso]]:
         """
         Calcula todos os caminhos possíveis entre dois vértices usando busca em profundidade.
+        É uma função recursiva.
 
         Args:
             origem (str): Vértice de origem.
@@ -129,11 +130,9 @@ class Grafo:
                                      Cada caminho é uma lista de tuplas (vértice, peso).
         """
         # Inicializar valores padrão
-        if caminho_atual is None:
-            caminho_atual = []
+        caminho_atual = caminho_atual or []
 
-        if visitados is None:
-            visitados = set()
+        visitados = visitados or set()
 
         # Converter para maiúsculo para manter o padrão
         origem = origem.upper()
