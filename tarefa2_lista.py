@@ -157,6 +157,7 @@ class Grafo:
                 novo_caminho = caminho_atual + [(proximo_destino, peso)]
 
                 # Criar uma cópia do conjunto de visitados para a recursão
+                # Se a mesma lista eh passada, os valores seriam alterados na proxima chamada.
                 novo_visitados = visitados.copy()
 
                 # Chamada recursiva para continuar a partir do próximo destino
