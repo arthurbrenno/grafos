@@ -173,11 +173,9 @@ class Grafo:
                                      Cada caminho é uma lista de tuplas (vértice, peso).
         """
         # Inicializar valores padrão
-        if caminho_atual is None:
-            caminho_atual = []
+        caminho_atual = caminho_atual or []
 
-        if visitados is None:
-            visitados = set()
+        visitados = visitados or set()
 
         # Registrar o vértice atual como visitado
         visitados.add(origem)
@@ -202,8 +200,8 @@ class Grafo:
 
             # Chamada recursiva para continuar a partir do próximo destino
             caminhos_encontrados = self.calcular_caminhos_possiveis(
-                origem=proximo_destino,
-                destino=destino,
+                origem=proximo_destino.upper(),
+                destino=destino.upper(),
                 caminho_atual=caminho_atual + [(proximo_destino, peso)],
                 visitados=visitados.copy(),
             )

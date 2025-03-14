@@ -133,10 +133,6 @@ class Grafo:
         caminho_atual = caminho_atual or []
         visitados = visitados or set()
 
-        # Converter para maiúsculo para manter o padrão
-        origem = origem.upper()
-        destino = destino.upper()
-
         # Registrar o vértice atual como visitado
         visitados.add(origem)
 
@@ -155,8 +151,8 @@ class Grafo:
 
             # Chamada recursiva para continuar a partir do próximo destino
             caminhos_encontrados = self.calcular_caminhos_possiveis(
-                origem=proximo_destino,
-                destino=destino,
+                origem=proximo_destino.upper(),
+                destino=destino.upper(),
                 caminho_atual=caminho_atual + [(proximo_destino, peso)],
                 visitados=visitados.copy(),
             )
@@ -305,7 +301,9 @@ D E 2.5""")
         origem = input("\nDigite o vértice de origem: ").upper()
         destino = input("Digite o vértice de destino: ").upper()
 
-        caminhos = g.calcular_caminhos_possiveis(origem=origem, destino=destino)
+        caminhos = g.calcular_caminhos_possiveis(
+            origem=origem.upper(), destino=destino.upper()
+        )
 
         if not caminhos:
             print(f"Não foram encontrados caminhos de {origem} para {destino}.")
