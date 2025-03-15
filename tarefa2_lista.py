@@ -307,7 +307,7 @@ D E 2.5""")
 
         soma = 0
         for caminho in caminhos:
-            for destino, peso in caminho:
+            for _, peso in caminho:
                 soma += peso
 
         print(soma)

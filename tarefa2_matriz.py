@@ -382,6 +382,13 @@ D E 2.5""")
 
         caminhos = g.calcular_caminhos_possiveis(origem=origem, destino=destino)
 
+        soma = 0
+        for caminho in caminhos:
+            for _, peso in caminho:
+                soma += peso
+
+        print(soma)
+
         if not caminhos:
             print(f"Não foram encontrados caminhos de {origem} para {destino}.")
         else:
