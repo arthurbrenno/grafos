@@ -304,6 +304,8 @@ D E 2.5""")
         caminhos = g.calcular_caminhos_possiveis(
             origem=origem.upper(), destino=destino.upper()
         )
+        
+        print(caminhos)
 
         soma = 0
         for caminho in caminhos:
@@ -313,7 +315,10 @@ D E 2.5""")
         print(soma)
 
         print("Peso vertices adjacentes: ")
-        print(g.obter_peso_vertices_adjacentes(origem, destino))
+        try:
+            print(g.obter_peso_vertices_adjacentes(origem, destino))
+        except Exception:
+            pass
 
         if not caminhos:
             print(f"Não foram encontrados caminhos de {origem} para {destino}.")
