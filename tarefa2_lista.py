@@ -312,6 +312,9 @@ D E 2.5""")
 
         print(soma)
 
+        print("Peso vertices adjacentes: ")
+        print(g.obter_peso_vertices_adjacentes(origem, destino))
+
         if not caminhos:
             print(f"Não foram encontrados caminhos de {origem} para {destino}.")
         else:
