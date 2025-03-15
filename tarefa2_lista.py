@@ -305,6 +305,13 @@ D E 2.5""")
             origem=origem.upper(), destino=destino.upper()
         )
 
+        soma = 0
+        for caminho in caminhos:
+            for destino, peso in caminho:
+                soma += peso
+
+        print(soma)
+
         if not caminhos:
             print(f"Não foram encontrados caminhos de {origem} para {destino}.")
         else:
