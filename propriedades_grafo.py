@@ -1,3 +1,6 @@
+"""Dessa vez fiz um codigo mais simples sem tipagem"""
+
+
 class Grafo:
     def __init__(self):
         self.grafo = {}
