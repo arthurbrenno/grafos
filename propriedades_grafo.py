@@ -15,9 +15,9 @@ class Grafo:
         self.grafo[v1].append(v2)
         self.grafo[v2].append(v1)
 
-    def eh_conexo(): ...
+    def eh_conexo(): ... # usar recursao
 
-    def eh_ciclico(): ...
+    def eh_ciclico(): ... # usar for
 
     def eh_plano(): ...
 
