@@ -1,4 +1,5 @@
 """Dessa vez fiz um codigo mais simples sem tipagem"""
+# Arthur Brenno e Yannes Fidalgo
 
 
 class Grafo:
