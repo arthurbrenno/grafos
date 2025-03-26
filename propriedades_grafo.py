@@ -1,4 +1,4 @@
-"""Dessa vez fiz um codigo mais simples sem tipagem"""
+"""Dessa vez fiz um codigo mais simples"""
 # Arthur Brenno e Yannes Fidalgo
 
 
