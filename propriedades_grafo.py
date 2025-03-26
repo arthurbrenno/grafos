@@ -50,6 +50,8 @@ class Grafo:
         Returns:
             bool: True se o grafo for cíclico, False caso contrário
         """
+
+        # vou otimizar isso ainda
         visitados: set[str] = set()
 
         def tem_ciclo(vertice: str, pai: str | None) -> bool:
