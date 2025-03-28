@@ -1,26 +1,4 @@
-# Grafo de exemplo
-VERTICES:
-A
-B
-C
-D
-E
-F
-G
-H
-I
-J
-
-ARESTAS:
-A B 5
-A C 3
-B D 4
-C D 2
-C E 6
-D F 3
-E F 4
-E G 7
-F H 2
-G I 5
-H I 3
-H J 4
+A,B
+B,C
+C,D
+A,D

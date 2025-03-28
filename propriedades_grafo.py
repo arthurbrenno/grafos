@@ -1,12 +1,34 @@
-"""Dessa vez fiz um codigo mais simples"""
-# Arthur Brenno e Yannes Fidalgo
+"""
+Implementação de um grafo não-direcionado com leitura de arquivo e menu interativo.
+- Autores: Arthur Brenno e Yannes Fidalgo
+"""
+
+import os
+from typing import Literal
 
 
 class Grafo:
-    def __init__(self):
-        self.grafo = {}
+    """
+    Classe que implementa um grafo não-direcionado utilizando lista de adjacência.
 
-    def add_aresta(self, v1, v2):
+    Permite operações básicas como adicionar arestas e verificar propriedades do grafo
+    como conexidade, ciclicidade e planaridade.
+    """
+
+    def __init__(self) -> None:
+        """
+        Inicializa um grafo vazio.
+        """
+        self.grafo: dict[str, list[str]] = {}
+
+    def add_aresta(self, v1: str, v2: str) -> None:
+        """
+        Adiciona uma aresta não-direcionada entre dois vértices no grafo.
+
+        Args:
+            v1: Primeiro vértice da aresta
+            v2: Segundo vértice da aresta
+        """
         if v1 not in self.grafo:
             self.grafo[v1] = []
 
@@ -15,6 +37,48 @@ class Grafo:
 
         self.grafo[v1].append(v2)
         self.grafo[v2].append(v1)
+
+    def carregar_de_arquivo(self, nome_arquivo: str = "input.txt") -> bool:
+        """
+        Carrega um grafo a partir do arquivo input.txt.
+
+        O formato esperado do arquivo é:
+        - Uma aresta por linha
+        - Cada linha contém dois vértices separados por espaço ou vírgula
+
+        Args:
+            nome_arquivo: Nome do arquivo contendo a definição do grafo
+
+        Returns:
+            bool: True se o arquivo foi carregado com sucesso, False caso contrário
+        """
+        try:
+            with open(nome_arquivo, "r") as arquivo:
+                # Limpa o grafo atual
+                self.grafo = {}
+
+                for linha in arquivo:
+                    # Remove espaços em branco extras e quebra de linha
+                    linha = linha.strip()
+
+                    if not linha or linha.startswith("#"):
+                        continue  # Ignora linhas vazias e comentários
+
+                    # Tenta separar por espaço ou vírgula
+                    if "," in linha:
+                        v1, v2 = linha.split(",", 1)
+                    else:
+                        v1, v2 = linha.split(None, 1)
+
+                    v1 = v1.strip()
+                    v2 = v2.strip()
+
+                    self.add_aresta(v1, v2)
+
+                return True
+        except Exception as e:
+            print(f"Erro ao carregar o arquivo: {e}")
+            return False
 
     def eh_conexo(self) -> bool:
         """
@@ -50,8 +114,6 @@ class Grafo:
         Returns:
             bool: True se o grafo for cíclico, False caso contrário
         """
-
-        # vou otimizar isso ainda
         visitados: set[str] = set()
 
         def tem_ciclo(vertice: str, pai: str | None) -> bool:
@@ -105,8 +167,124 @@ class Grafo:
         # Para v < 3, qualquer grafo é planar
         return True
 
+    def mostrar_grafo(self) -> None:
+        """
+        Exibe uma representação do grafo na tela.
+        """
+        if not self.grafo:
+            print("Grafo vazio.")
+            return
 
-g = Grafo()
+        print("\nRepresentação do Grafo (Lista de Adjacência):")
+        print("-" * 50)
 
-g.add_aresta("A", "B")
-print(g.grafo)
+        for vertice, vizinhos in sorted(self.grafo.items()):
+            print(f"{vertice} -> {', '.join(sorted(vizinhos))}")
+
+        print("-" * 50)
+        print(f"Total de vértices: {len(self.grafo)}")
+
+        # Calcula o número de arestas (cada aresta é contada duas vezes na lista de adjacência)
+        total_arestas = sum(len(vizinhos) for vizinhos in self.grafo.values()) // 2
+        print(f"Total de arestas: {total_arestas}")
+        print("-" * 50)
+
+
+def limpar_tela() -> None:
+    """
+    Limpa a tela do console.
+    """
+    # Para Windows
+    if os.name == "nt":
+        os.system("cls")
+    # Para MacOS e Linux
+    else:
+        os.system("clear")
+
+
+def mostrar_menu() -> None:
+    """
+    Exibe o menu principal do programa.
+    """
+    print("\n==== MENU DO GRAFO ====")
+    print("1. Mostrar grafo")
+    print("2. Verificar se o grafo é conexo")
+    print("3. Verificar se o grafo é cíclico")
+    print("4. Verificar se o grafo é planar")
+    print("5. Adicionar aresta")
+    print("0. Sair")
+    print("=======================")
+
+
+def menu_principal() -> None:
+    """
+    Função principal que implementa o menu interativo para o grafo.
+    """
+    grafo = Grafo()
+
+    limpar_tela()
+
+    # Carrega o grafo do arquivo input.txt automaticamente na inicialização
+    print("Carregando grafo do arquivo input.txt...")
+    if grafo.carregar_de_arquivo():
+        print("Grafo carregado com sucesso!")
+    else:
+        print(
+            "Não foi possível carregar o grafo. Verifique se o arquivo input.txt existe."
+        )
+
+    while True:
+        limpar_tela()
+        mostrar_menu()
+
+        try:
+            opcao = input("Escolha uma opção: ")
+
+            limpar_tela()
+
+            match opcao:
+                case "1":
+                    grafo.mostrar_grafo()
+
+                case "2":
+                    if grafo.eh_conexo():
+                        print("\nO grafo É conexo.")
+                    else:
+                        print("\nO grafo NÃO é conexo.")
+
+                case "3":
+                    if grafo.eh_ciclico():
+                        print("\nO grafo É cíclico.")
+                    else:
+                        print("\nO grafo NÃO é cíclico.")
+
+                case "4":
+                    if grafo.eh_plano():
+                        print("\nO grafo É planar.")
+                    else:
+                        print("\nO grafo NÃO é planar.")
+
+                case "5":
+                    v1 = input("Digite o primeiro vértice: ")
+                    v2 = input("Digite o segundo vértice: ")
+                    grafo.add_aresta(v1, v2)
+                    print(f"\nAresta adicionada: {v1} -- {v2}")
+
+                case "0":
+                    print("\nEncerrando o programa...")
+                    break
+
+                case _:
+                    print("\nOpção inválida. Tente novamente.")
+
+            input("\nPressione Enter para continuar...")
+
+        except Exception as e:
+            print(f"\nErro: {e}")
+            input("\nPressione Enter para continuar...")
+
+
+if __name__ == "__main__":
+    print("===== SISTEMA DE GRAFO =====")
+    print("Autores: Arthur Brenno e Yannes Fidalgo")
+    menu_principal()
