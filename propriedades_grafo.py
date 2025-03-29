@@ -4,7 +4,6 @@ Implementação de um grafo não-direcionado com leitura de arquivo e menu inter
 """
 
 import os
-from typing import Literal
 
 
 class Grafo:
