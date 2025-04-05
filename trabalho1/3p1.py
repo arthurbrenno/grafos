@@ -19,22 +19,25 @@ class Grafo:
 
     def add_aresta(self, v1, v2):
         vertices_do_grafo = self.grafo.keys()
-        
+
         if v1 not in vertices_do_grafo:
-            self.grafo[v1] = []
+            self.grafo[v1] = set([])
 
         if v2 not in vertices_do_grafo:
-            self.grafo[v2] = []
+            self.grafo[v2] = set([])
 
         self.grafo[v1].add(v2)
         self.grafo[v2].add(v1)
 
     def calcular_ordem(self):
         vertices_do_grafo = self.grafo.keys()
-        return len(vertices_do_grafo)
+        quantidade_vertices = len(vertices_do_grafo)
+        return quantidade_vertices
 
     def calcular_tamanho(self):
-        return len(self.grafo.items())
+        arestas_grafo = self.grafo.items()
+        quantidade_arestas = len(arestas_grafo)
+        return quantidade_arestas
 
 
 g = Grafo()
