@@ -304,7 +304,7 @@ D E 2.5""")
         caminhos = g.calcular_caminhos_possiveis(
             origem=origem.upper(), destino=destino.upper()
         )
-        
+
         print(caminhos)
 
         soma = 0

@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Sequence
 
+
 @dataclass
 class Grafo:
     grafo: dict[str, set[str]] = field(default_factory=dict)
@@ -17,6 +18,7 @@ class Grafo:
         if v is None:
             raise KeyError("Vertice nao encontrado na lista de vertices.")
         return v
+
 
 g = Grafo()
 g.criar_vertice("A")
